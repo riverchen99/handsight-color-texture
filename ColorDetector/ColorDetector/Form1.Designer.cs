@@ -36,12 +36,18 @@
 			this.button1 = new System.Windows.Forms.Button();
 			this.pictureBox1 = new System.Windows.Forms.PictureBox();
 			this.ColorButton = new System.Windows.Forms.Button();
-			this.pictureBox2 = new System.Windows.Forms.PictureBox();
+			this.actualColorBox = new System.Windows.Forms.PictureBox();
 			this.ColorLabel = new System.Windows.Forms.Label();
+			this.closestColorBox = new System.Windows.Forms.PictureBox();
+			this.histBox = new System.Windows.Forms.PictureBox();
+			this.smoothedHistBox = new System.Windows.Forms.PictureBox();
 			((System.ComponentModel.ISupportInitialize)(this.ledTrackbar)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.gainTrackbar)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.actualColorBox)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.closestColorBox)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.histBox)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.smoothedHistBox)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// ledTrackbar
@@ -183,7 +189,7 @@
 			// 
 			// ColorButton
 			// 
-			this.ColorButton.Location = new System.Drawing.Point(75, 461);
+			this.ColorButton.Location = new System.Drawing.Point(49, 362);
 			this.ColorButton.Name = "ColorButton";
 			this.ColorButton.Size = new System.Drawing.Size(75, 42);
 			this.ColorButton.TabIndex = 38;
@@ -191,32 +197,65 @@
 			this.ColorButton.UseVisualStyleBackColor = true;
 			this.ColorButton.Click += new System.EventHandler(this.ColorButton_Click);
 			// 
-			// pictureBox2
+			// actualColorBox
 			// 
-			this.pictureBox2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.pictureBox2.Location = new System.Drawing.Point(326, 439);
-			this.pictureBox2.Margin = new System.Windows.Forms.Padding(4);
-			this.pictureBox2.Name = "pictureBox2";
-			this.pictureBox2.Size = new System.Drawing.Size(101, 94);
-			this.pictureBox2.TabIndex = 39;
-			this.pictureBox2.TabStop = false;
+			this.actualColorBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.actualColorBox.Location = new System.Drawing.Point(219, 362);
+			this.actualColorBox.Margin = new System.Windows.Forms.Padding(4);
+			this.actualColorBox.Name = "actualColorBox";
+			this.actualColorBox.Size = new System.Drawing.Size(101, 94);
+			this.actualColorBox.TabIndex = 39;
+			this.actualColorBox.TabStop = false;
 			// 
 			// ColorLabel
 			// 
 			this.ColorLabel.AutoSize = true;
-			this.ColorLabel.Location = new System.Drawing.Point(83, 540);
+			this.ColorLabel.Location = new System.Drawing.Point(57, 441);
 			this.ColorLabel.Name = "ColorLabel";
 			this.ColorLabel.Size = new System.Drawing.Size(46, 17);
 			this.ColorLabel.TabIndex = 40;
 			this.ColorLabel.Text = "label2";
 			// 
+			// closestColorBox
+			// 
+			this.closestColorBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.closestColorBox.Location = new System.Drawing.Point(358, 362);
+			this.closestColorBox.Margin = new System.Windows.Forms.Padding(4);
+			this.closestColorBox.Name = "closestColorBox";
+			this.closestColorBox.Size = new System.Drawing.Size(101, 94);
+			this.closestColorBox.TabIndex = 41;
+			this.closestColorBox.TabStop = false;
+			// 
+			// histBox
+			// 
+			this.histBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.histBox.Location = new System.Drawing.Point(60, 478);
+			this.histBox.Margin = new System.Windows.Forms.Padding(4);
+			this.histBox.Name = "histBox";
+			this.histBox.Size = new System.Drawing.Size(360, 250);
+			this.histBox.TabIndex = 42;
+			this.histBox.TabStop = false;
+			// 
+			// smoothedHistBox
+			// 
+			this.smoothedHistBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.smoothedHistBox.Location = new System.Drawing.Point(512, 478);
+			this.smoothedHistBox.Margin = new System.Windows.Forms.Padding(4);
+			this.smoothedHistBox.Name = "smoothedHistBox";
+			this.smoothedHistBox.Size = new System.Drawing.Size(360, 250);
+			this.smoothedHistBox.TabIndex = 43;
+			this.smoothedHistBox.TabStop = false;
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(683, 617);
+			this.ClientSize = new System.Drawing.Size(954, 759);
+			this.Controls.Add(this.smoothedHistBox);
+			this.Controls.Add(this.histBox);
+			this.Controls.Add(this.closestColorBox);
 			this.Controls.Add(this.ColorLabel);
-			this.Controls.Add(this.pictureBox2);
+			this.Controls.Add(this.actualColorBox);
 			this.Controls.Add(this.ColorButton);
 			this.Controls.Add(this.ledTrackbar);
 			this.Controls.Add(this.ledCheckbox);
@@ -235,7 +274,10 @@
 			((System.ComponentModel.ISupportInitialize)(this.ledTrackbar)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.gainTrackbar)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.actualColorBox)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.closestColorBox)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.histBox)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.smoothedHistBox)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -256,8 +298,11 @@
 		private System.Windows.Forms.Button button1;
 		private System.Windows.Forms.PictureBox pictureBox1;
 		private System.Windows.Forms.Button ColorButton;
-		private System.Windows.Forms.PictureBox pictureBox2;
+		private System.Windows.Forms.PictureBox actualColorBox;
 		private System.Windows.Forms.Label ColorLabel;
+		private System.Windows.Forms.PictureBox closestColorBox;
+		private System.Windows.Forms.PictureBox histBox;
+		private System.Windows.Forms.PictureBox smoothedHistBox;
 
 	}
 }

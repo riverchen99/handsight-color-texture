@@ -10,7 +10,9 @@ using System.Windows.Forms;
 using Awaiba.Drivers.Grabbers;
 using Awaiba.FrameProcessing;
 using System.IO;
-
+using System.Speech.Synthesis;
+using System.Text.RegularExpressions;
+using System.Threading;
 namespace ColorDetector {
 	public partial class Form1 : Form {
 		private KnownColor[] toRemove = {KnownColor.ActiveBorder,
@@ -46,7 +48,10 @@ namespace ColorDetector {
 										KnownColor.Window, 
 										KnownColor.WindowFrame, 
 										KnownColor.WindowText};
+		private List<KnownColor> knownColors = new List<KnownColor>((KnownColor[])Enum.GetValues(typeof(KnownColor)));
 		NanEye2DNanoUSB2Provider provider;
+		private SpeechSynthesizer reader = new SpeechSynthesizer();
+		
 		public Form1() {
 			Awaiba.Drivers.Grabbers.Location.Paths.FpgaFilesDirectory = @"C:\Users\Makeability\Source\Repos\handsight-color-texture\dependencies\fpga files\";
 			Awaiba.Drivers.Grabbers.Location.Paths.BinFile = @"nanousb2_fpga_v07.bin";
@@ -100,16 +105,25 @@ namespace ColorDetector {
 
 			////To send the value 1.8 to the digipot
 			provider.WriteRegister(new NanEyeRegisterPayload(false, 0x04, true, 0, 2000));
+
+			foreach (KnownColor c in toRemove) {
+				knownColors.Remove(c);
+			}
 		}
 
 		private void provider_Exception(object sender, OnExceptionEventArgs e) {
 			Console.WriteLine(e.ex.Message);
 		}
 
+		string lockObj = "lockObj";
 		private void provider_ImageProcessed(object sender, OnImageReceivedBitmapEventArgs e) {
-			try {
-				pictureBox1.Image = ProcessingWrapper.pr[0].CreateProcessedBitmap(e.GetImageData);
-			} catch { }
+			if (Monitor.TryEnter(lockObj)) {
+				try {
+					Bitmap temp = ProcessingWrapper.pr[0].CreateProcessedBitmap(e.GetImageData);
+					// update the UI in the main thread to avoid annoying InvalidOperationException issues
+					Invoke(new MethodInvoker(delegate { pictureBox1.Image = temp; }));
+				} catch { } finally { Monitor.Exit(lockObj); }
+			}
 		}
 
 		private void button1_Click(object sender, EventArgs e) {
@@ -166,8 +180,13 @@ namespace ColorDetector {
 			provider.WriteRegister(new NanEyeRegisterPayload(false, 0x01, true, 0, Convert.ToInt32(gainTrackbar.Value)));
 		}
 
+		private void TTS(string text) {
+			reader.SpeakAsyncCancelAll();
+			reader.SpeakAsync(text);
+		}
+
 		private void ColorButton_Click(object sender, EventArgs e) {
-			
+			Dictionary<Color, int> colors = new Dictionary<Color, int>();
 			int totalR = 0;
 			int totalG = 0;
 			int totalB = 0;
@@ -180,28 +199,55 @@ namespace ColorDetector {
 					totalR += pixel.R;
 					totalG += pixel.G;
 					totalB += pixel.B;
+					if (colors.ContainsKey((pixel))) { colors[pixel] += 1; } else { colors.Add(pixel, 1); }
 				}
 			}
-			Color avgColor = Color.FromArgb(totalR / pxCount, totalG / pxCount, totalB / pxCount);
-			var knownColors = new List<KnownColor>( (KnownColor[]) Enum.GetValues(typeof(KnownColor)));
 
-			foreach (KnownColor c in toRemove) {
-				knownColors.Remove(c);
-			}
+			Color avgRGBColor = Color.FromArgb(totalR / pxCount, totalG / pxCount, totalB / pxCount);			
 			Color closestColor = Color.FromKnownColor(KnownColor.Black);
 			foreach (KnownColor c in knownColors) {
-				closestColor = ColorDistance(avgColor, Color.FromKnownColor(c)) < ColorDistance(avgColor, closestColor) ? Color.FromKnownColor(c) : closestColor;
+				closestColor = ColorDistance(avgRGBColor, Color.FromKnownColor(c)) < ColorDistance(avgRGBColor, closestColor) ? Color.FromKnownColor(c) : closestColor;
 			}
-			ColorLabel.Text = closestColor.Name;
+			ColorLabel.Text = Regex.Replace(closestColor.Name, "(\\B[A-Z])", " $1");
+			TTS(Regex.Replace(closestColor.Name, "(\\B[A-Z])", " $1"));
+			actualColorBox.BackColor = avgRGBColor;
+			closestColorBox.BackColor = closestColor;
 
-			Bitmap outImage = new Bitmap(100, 100);
-			Graphics outImageGraphics = Graphics.FromImage(outImage);
-			outImageGraphics.Clear(avgColor);
-			pictureBox2.Image = outImage;
+			Bitmap hist = new Bitmap(360, colors.Values.Max());
+			histBox.Image = hist;
+			Graphics g1 = Graphics.FromImage(hist);
+			var sortedKeys = colors.Keys.ToList();
+			sortedKeys.Sort(new ColorComparer());
+			foreach (Color c in sortedKeys) {
+				g1.FillRectangle(new SolidBrush(c), new Rectangle((int)c.GetHue(), 0, 1, colors[c]));
+			}
+
+			for (int i = 0; i < 3; i++) {
+				for (int c = 0; c < sortedKeys.Count; c++) {
+					try {
+						colors[sortedKeys[c]] = (colors[sortedKeys[c - 1]] + colors[sortedKeys[c + 1]]) / 2;
+					} catch {
+						;
+					}
+				}
+			}
+			
+			Bitmap histSmoothed = new Bitmap(360, colors.Values.Max());
+			smoothedHistBox.Image = histSmoothed;
+			Graphics g2 = Graphics.FromImage(histSmoothed);
+			foreach (Color c in sortedKeys) {
+				g2.FillRectangle(new SolidBrush(c), new Rectangle((int)c.GetHue(), 0, 1, colors[c]));
+			}
 		}
 
 		private double ColorDistance(Color c1, Color c2) {
 			return Math.Pow(Math.Pow((double) (c1.R - c2.R), 2.0) + Math.Pow((double) (c1.G - c2.G), 2.0) + Math.Pow((double) (c1.B - c2.B), 2.0), .5);
+		}
+	}
+
+	public class ColorComparer : IComparer<Color> {
+		public int Compare(Color a, Color b) {
+			return Math.Sign(a.GetHue() - b.GetHue());
 		}
 	}
 }
