@@ -187,12 +187,12 @@ namespace ColorDetector {
 		}
 
 		private void ColorButton_Click(object sender, EventArgs e) {
-			
 			Dictionary<Color, int> colors = new Dictionary<Color, int>();
 			int totalR = 0;
 			int totalG = 0;
 			int totalB = 0;
 
+			// get pixels in image
 			Bitmap snap = new Bitmap(pictureBox1.Image);
 			int pxCount = snap.Width * snap.Height;
 			for (int i = 0; i < snap.Width; i++) {
@@ -205,6 +205,7 @@ namespace ColorDetector {
 				}
 			}
 
+			// display average rgb color and closest knowncolor match
 			Color avgRGBColor = Color.FromArgb(totalR / pxCount, totalG / pxCount, totalB / pxCount);
 			Color closestColor = Color.FromKnownColor(KnownColor.Black);
 			foreach (KnownColor c in knownColors) {
@@ -215,20 +216,37 @@ namespace ColorDetector {
 			actualColorBox.BackColor = avgRGBColor;
 			closestColorBox.BackColor = closestColor;
 
-			Bitmap hist = new Bitmap(360, colors.Values.Max());
-			histBox.Image = hist;
-			Graphics g1 = Graphics.FromImage(hist);
+			// generate histogram
 			var sortedKeys = colors.Keys.ToList();
 			sortedKeys.Sort(new ColorComparer());
+			List<int> histData = new List<int>();
+			int bins = 108;
 			foreach (Color c in sortedKeys) {
-				g1.FillRectangle(new SolidBrush(c), new Rectangle((int)c.GetHue(), 0, 1, colors[c]));
+				if (histData.Count > c.GetHue() * (bins/360.0)) {
+					histData[(int)(c.GetHue() * (bins/360.0))] += colors[c];
+				} else {
+					histData.Add(colors[c]);
+				}
 			}
 
+			Bitmap histImg = new Bitmap(625, 360);
+
+			histBox.Image = histImg;
+			Graphics g1 = Graphics.FromImage(histImg);
+
+			int s = 0;
+			for (int bin = 0; bin < histData.Count; bin++) {
+				s += histData[bin];
+				g1.FillRectangle(new SolidBrush(ColorFromHSL(1.0 * bin / bins, 1.0, .5)), new Rectangle(0, bin * (360 / bins), histData[bin] / 100, 360 / bins));
+			}
+			Console.WriteLine(s);
+			Console.WriteLine(histData.Max());
+			/*
 			Dictionary<Color, int> smoothedColors = new Dictionary<Color, int>();
 			smoothedColors[sortedKeys[0]] = (colors[sortedKeys.Last()] + colors[sortedKeys[0]] + colors[sortedKeys[1]]) / 3;
-			smoothedColors[sortedKeys.Last()] = (colors[sortedKeys[sortedKeys.Count-2]] + colors[sortedKeys.Last()] + colors[sortedKeys[0]]) / 3;
+			smoothedColors[sortedKeys.Last()] = (colors[sortedKeys[sortedKeys.Count - 2]] + colors[sortedKeys.Last()] + colors[sortedKeys[0]]) / 3;
 			for (int c = 1; c < sortedKeys.Count - 1; c++) {
-					smoothedColors[sortedKeys[c]] = (colors[sortedKeys[c - 1]] + colors[sortedKeys[c]] + colors[sortedKeys[c + 1]]) / 3;
+				smoothedColors[sortedKeys[c]] = (colors[sortedKeys[c - 1]] + colors[sortedKeys[c]] + colors[sortedKeys[c + 1]]) / 3;
 			}
 
 			Bitmap histSmoothed = new Bitmap(360, smoothedColors.Values.Max());
@@ -252,7 +270,7 @@ namespace ColorDetector {
 			TTS(Regex.Replace(closestColor.Name, "(\\B[A-Z])", " $1"));
 			highestColorBox.BackColor = highestColor;
 			closestColorBox2.BackColor = closestColor;
-			
+			*/
 
 			/*
 			Bitmap snap = new Bitmap(pictureBox1.Image);
@@ -261,17 +279,56 @@ namespace ColorDetector {
 			closestColorBox.BackColor = System.Drawing.Color.FromArgb(x.R, x.G, x.B);
 			 */
 		}
-		
+
 		private double ColorDistance(Color c1, Color c2) {
 			return Math.Pow(Math.Pow((double)(c1.R - c2.R), 2.0) + Math.Pow((double)(c1.G - c2.G), 2.0) + Math.Pow((double)(c1.B - c2.B), 2.0), .5);
 		}
-		
-	}
-	
-	public class ColorComparer : IComparer<Color> {
-		public int Compare(Color a, Color b) {
-			return Math.Sign(a.GetHue() - b.GetHue());
+
+		// from http://james-ramsden.com/convert-from-hsl-to-rgb-colour-codes-in-c/
+		public static Color ColorFromHSL(double h, double s, double l) {
+			double r = 0, g = 0, b = 0;
+			if (l != 0) {
+				if (s == 0)
+					r = g = b = l;
+				else {
+					double temp2;
+					if (l < 0.5)
+						temp2 = l * (1.0 + s);
+					else
+						temp2 = l + s - (l * s);
+
+					double temp1 = 2.0 * l - temp2;
+
+					r = GetColorComponent(temp1, temp2, h + 1.0 / 3.0);
+					g = GetColorComponent(temp1, temp2, h);
+					b = GetColorComponent(temp1, temp2, h - 1.0 / 3.0);
+				}
+			}
+			return Color.FromArgb((int)(255 * r), (int)(255 * g), (int)(255 * b));
+
 		}
+
+		private static double GetColorComponent(double temp1, double temp2, double temp3) {
+			if (temp3 < 0.0)
+				temp3 += 1.0;
+			else if (temp3 > 1.0)
+				temp3 -= 1.0;
+
+			if (temp3 < 1.0 / 6.0)
+				return temp1 + (temp2 - temp1) * 6.0 * temp3;
+			else if (temp3 < 0.5)
+				return temp2;
+			else if (temp3 < 2.0 / 3.0)
+				return temp1 + ((temp2 - temp1) * ((2.0 / 3.0) - temp3) * 6.0);
+			else
+				return temp1;
+		}
+
+		public class ColorComparer : IComparer<Color> {
+			public int Compare(Color a, Color b) {
+				return Math.Sign(a.GetHue() - b.GetHue());
+			}
+		}
+
 	}
-	
 }

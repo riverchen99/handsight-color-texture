@@ -237,17 +237,17 @@
 			this.histBox.Location = new System.Drawing.Point(60, 478);
 			this.histBox.Margin = new System.Windows.Forms.Padding(4);
 			this.histBox.Name = "histBox";
-			this.histBox.Size = new System.Drawing.Size(360, 130);
+			this.histBox.Size = new System.Drawing.Size(625, 360);
 			this.histBox.TabIndex = 42;
 			this.histBox.TabStop = false;
 			// 
 			// smoothedHistBox
 			// 
 			this.smoothedHistBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.smoothedHistBox.Location = new System.Drawing.Point(512, 478);
+			this.smoothedHistBox.Location = new System.Drawing.Point(791, 478);
 			this.smoothedHistBox.Margin = new System.Windows.Forms.Padding(4);
 			this.smoothedHistBox.Name = "smoothedHistBox";
-			this.smoothedHistBox.Size = new System.Drawing.Size(360, 130);
+			this.smoothedHistBox.Size = new System.Drawing.Size(360, 366);
 			this.smoothedHistBox.TabIndex = 43;
 			this.smoothedHistBox.TabStop = false;
 			// 
@@ -284,7 +284,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(954, 645);
+			this.ClientSize = new System.Drawing.Size(1254, 915);
 			this.Controls.Add(this.ColorLabel2);
 			this.Controls.Add(this.closestColorBox2);
 			this.Controls.Add(this.highestColorBox);
