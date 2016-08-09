@@ -41,6 +41,9 @@
 			this.closestColorBox = new System.Windows.Forms.PictureBox();
 			this.histBox = new System.Windows.Forms.PictureBox();
 			this.smoothedHistBox = new System.Windows.Forms.PictureBox();
+			this.highestColorBox = new System.Windows.Forms.PictureBox();
+			this.closestColorBox2 = new System.Windows.Forms.PictureBox();
+			this.ColorLabel2 = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this.ledTrackbar)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.gainTrackbar)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -48,6 +51,8 @@
 			((System.ComponentModel.ISupportInitialize)(this.closestColorBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.histBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.smoothedHistBox)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.highestColorBox)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.closestColorBox2)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// ledTrackbar
@@ -189,7 +194,7 @@
 			// 
 			// ColorButton
 			// 
-			this.ColorButton.Location = new System.Drawing.Point(49, 362);
+			this.ColorButton.Location = new System.Drawing.Point(60, 386);
 			this.ColorButton.Name = "ColorButton";
 			this.ColorButton.Size = new System.Drawing.Size(75, 42);
 			this.ColorButton.TabIndex = 38;
@@ -200,7 +205,7 @@
 			// actualColorBox
 			// 
 			this.actualColorBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.actualColorBox.Location = new System.Drawing.Point(219, 362);
+			this.actualColorBox.Location = new System.Drawing.Point(173, 362);
 			this.actualColorBox.Margin = new System.Windows.Forms.Padding(4);
 			this.actualColorBox.Name = "actualColorBox";
 			this.actualColorBox.Size = new System.Drawing.Size(101, 94);
@@ -210,16 +215,16 @@
 			// ColorLabel
 			// 
 			this.ColorLabel.AutoSize = true;
-			this.ColorLabel.Location = new System.Drawing.Point(57, 441);
+			this.ColorLabel.Location = new System.Drawing.Point(354, 341);
 			this.ColorLabel.Name = "ColorLabel";
-			this.ColorLabel.Size = new System.Drawing.Size(46, 17);
+			this.ColorLabel.Size = new System.Drawing.Size(23, 17);
 			this.ColorLabel.TabIndex = 40;
-			this.ColorLabel.Text = "label2";
+			this.ColorLabel.Text = "---";
 			// 
 			// closestColorBox
 			// 
 			this.closestColorBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.closestColorBox.Location = new System.Drawing.Point(358, 362);
+			this.closestColorBox.Location = new System.Drawing.Point(319, 362);
 			this.closestColorBox.Margin = new System.Windows.Forms.Padding(4);
 			this.closestColorBox.Name = "closestColorBox";
 			this.closestColorBox.Size = new System.Drawing.Size(101, 94);
@@ -232,7 +237,7 @@
 			this.histBox.Location = new System.Drawing.Point(60, 478);
 			this.histBox.Margin = new System.Windows.Forms.Padding(4);
 			this.histBox.Name = "histBox";
-			this.histBox.Size = new System.Drawing.Size(360, 250);
+			this.histBox.Size = new System.Drawing.Size(360, 130);
 			this.histBox.TabIndex = 42;
 			this.histBox.TabStop = false;
 			// 
@@ -242,15 +247,47 @@
 			this.smoothedHistBox.Location = new System.Drawing.Point(512, 478);
 			this.smoothedHistBox.Margin = new System.Windows.Forms.Padding(4);
 			this.smoothedHistBox.Name = "smoothedHistBox";
-			this.smoothedHistBox.Size = new System.Drawing.Size(360, 250);
+			this.smoothedHistBox.Size = new System.Drawing.Size(360, 130);
 			this.smoothedHistBox.TabIndex = 43;
 			this.smoothedHistBox.TabStop = false;
+			// 
+			// highestColorBox
+			// 
+			this.highestColorBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.highestColorBox.Location = new System.Drawing.Point(512, 362);
+			this.highestColorBox.Margin = new System.Windows.Forms.Padding(4);
+			this.highestColorBox.Name = "highestColorBox";
+			this.highestColorBox.Size = new System.Drawing.Size(101, 94);
+			this.highestColorBox.TabIndex = 44;
+			this.highestColorBox.TabStop = false;
+			// 
+			// closestColorBox2
+			// 
+			this.closestColorBox2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.closestColorBox2.Location = new System.Drawing.Point(651, 362);
+			this.closestColorBox2.Margin = new System.Windows.Forms.Padding(4);
+			this.closestColorBox2.Name = "closestColorBox2";
+			this.closestColorBox2.Size = new System.Drawing.Size(101, 94);
+			this.closestColorBox2.TabIndex = 45;
+			this.closestColorBox2.TabStop = false;
+			// 
+			// ColorLabel2
+			// 
+			this.ColorLabel2.AutoSize = true;
+			this.ColorLabel2.Location = new System.Drawing.Point(691, 341);
+			this.ColorLabel2.Name = "ColorLabel2";
+			this.ColorLabel2.Size = new System.Drawing.Size(23, 17);
+			this.ColorLabel2.TabIndex = 46;
+			this.ColorLabel2.Text = "---";
 			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(954, 759);
+			this.ClientSize = new System.Drawing.Size(954, 645);
+			this.Controls.Add(this.ColorLabel2);
+			this.Controls.Add(this.closestColorBox2);
+			this.Controls.Add(this.highestColorBox);
 			this.Controls.Add(this.smoothedHistBox);
 			this.Controls.Add(this.histBox);
 			this.Controls.Add(this.closestColorBox);
@@ -278,6 +315,8 @@
 			((System.ComponentModel.ISupportInitialize)(this.closestColorBox)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.histBox)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.smoothedHistBox)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.highestColorBox)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.closestColorBox2)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -303,6 +342,9 @@
 		private System.Windows.Forms.PictureBox closestColorBox;
 		private System.Windows.Forms.PictureBox histBox;
 		private System.Windows.Forms.PictureBox smoothedHistBox;
+		private System.Windows.Forms.PictureBox highestColorBox;
+		private System.Windows.Forms.PictureBox closestColorBox2;
+		private System.Windows.Forms.Label ColorLabel2;
 
 	}
 }

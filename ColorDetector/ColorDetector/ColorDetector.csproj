@@ -88,6 +88,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\dependencies\x86\CesysProvider.dll</HintPath>
     </Reference>
+    <Reference Include="ColorThief.Desktop.v45, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ksemenenko.ColorThief.1.0.0.0\lib\net45\ColorThief.Desktop.v45.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="GeneralFpgaAlgorithms, Version=1.2.0.0, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\dependencies\x86\GeneralFpgaAlgorithms.dll</HintPath>
@@ -128,6 +132,7 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

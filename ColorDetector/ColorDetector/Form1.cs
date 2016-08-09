@@ -13,6 +13,7 @@ using System.IO;
 using System.Speech.Synthesis;
 using System.Text.RegularExpressions;
 using System.Threading;
+//using ColorThief;
 namespace ColorDetector {
 	public partial class Form1 : Form {
 		private KnownColor[] toRemove = {KnownColor.ActiveBorder,
@@ -51,7 +52,7 @@ namespace ColorDetector {
 		private List<KnownColor> knownColors = new List<KnownColor>((KnownColor[])Enum.GetValues(typeof(KnownColor)));
 		NanEye2DNanoUSB2Provider provider;
 		private SpeechSynthesizer reader = new SpeechSynthesizer();
-		
+
 		public Form1() {
 			Awaiba.Drivers.Grabbers.Location.Paths.FpgaFilesDirectory = @"C:\Users\Makeability\Source\Repos\handsight-color-texture\dependencies\fpga files\";
 			Awaiba.Drivers.Grabbers.Location.Paths.BinFile = @"nanousb2_fpga_v07.bin";
@@ -60,7 +61,7 @@ namespace ColorDetector {
 			System.Threading.Thread.Sleep(1);
 			provider.ImageProcessed += provider_ImageProcessed;
 			provider.Exception += provider_Exception;
-			
+
 			/* NanEye Automatic Exposure Control Configuration
 			* 
 			* Please follow with the "NanEye - Automatic Exposure Control" PDF that can be found on Awaiba Webpage on the software tab:
@@ -186,6 +187,7 @@ namespace ColorDetector {
 		}
 
 		private void ColorButton_Click(object sender, EventArgs e) {
+			
 			Dictionary<Color, int> colors = new Dictionary<Color, int>();
 			int totalR = 0;
 			int totalG = 0;
@@ -203,7 +205,7 @@ namespace ColorDetector {
 				}
 			}
 
-			Color avgRGBColor = Color.FromArgb(totalR / pxCount, totalG / pxCount, totalB / pxCount);			
+			Color avgRGBColor = Color.FromArgb(totalR / pxCount, totalG / pxCount, totalB / pxCount);
 			Color closestColor = Color.FromKnownColor(KnownColor.Black);
 			foreach (KnownColor c in knownColors) {
 				closestColor = ColorDistance(avgRGBColor, Color.FromKnownColor(c)) < ColorDistance(avgRGBColor, closestColor) ? Color.FromKnownColor(c) : closestColor;
@@ -222,32 +224,54 @@ namespace ColorDetector {
 				g1.FillRectangle(new SolidBrush(c), new Rectangle((int)c.GetHue(), 0, 1, colors[c]));
 			}
 
-			for (int i = 0; i < 3; i++) {
-				for (int c = 0; c < sortedKeys.Count; c++) {
-					try {
-						colors[sortedKeys[c]] = (colors[sortedKeys[c - 1]] + colors[sortedKeys[c + 1]]) / 2;
-					} catch {
-						;
-					}
-				}
+			Dictionary<Color, int> smoothedColors = new Dictionary<Color, int>();
+			smoothedColors[sortedKeys[0]] = (colors[sortedKeys.Last()] + colors[sortedKeys[0]] + colors[sortedKeys[1]]) / 3;
+			smoothedColors[sortedKeys.Last()] = (colors[sortedKeys[sortedKeys.Count-2]] + colors[sortedKeys.Last()] + colors[sortedKeys[0]]) / 3;
+			for (int c = 1; c < sortedKeys.Count - 1; c++) {
+					smoothedColors[sortedKeys[c]] = (colors[sortedKeys[c - 1]] + colors[sortedKeys[c]] + colors[sortedKeys[c + 1]]) / 3;
 			}
-			
-			Bitmap histSmoothed = new Bitmap(360, colors.Values.Max());
+
+			Bitmap histSmoothed = new Bitmap(360, smoothedColors.Values.Max());
 			smoothedHistBox.Image = histSmoothed;
 			Graphics g2 = Graphics.FromImage(histSmoothed);
+			sortedKeys = smoothedColors.Keys.ToList();
+			sortedKeys.Sort(new ColorComparer());
 			foreach (Color c in sortedKeys) {
-				g2.FillRectangle(new SolidBrush(c), new Rectangle((int)c.GetHue(), 0, 1, colors[c]));
+				g2.FillRectangle(new SolidBrush(c), new Rectangle((int)c.GetHue(), 0, 1, smoothedColors[c]));
 			}
-		}
 
+			Color highestColor = smoothedColors[sortedKeys[0]] > smoothedColors[sortedKeys.Last()] ? sortedKeys[0] : sortedKeys.Last();
+			for (int c = 1; c < sortedKeys.Count - 1; c++) {
+				highestColor = colors[highestColor] > colors[sortedKeys[c-1]] + colors[sortedKeys[c]] + colors[sortedKeys[c+1]] ? highestColor : sortedKeys[c];
+			}
+			
+			foreach (KnownColor c in knownColors) {
+				closestColor = ColorDistance(highestColor, Color.FromKnownColor(c)) < ColorDistance(highestColor, closestColor) ? Color.FromKnownColor(c) : closestColor;
+			}
+			ColorLabel2.Text = Regex.Replace(closestColor.Name, "(\\B[A-Z])", " $1");
+			TTS(Regex.Replace(closestColor.Name, "(\\B[A-Z])", " $1"));
+			highestColorBox.BackColor = highestColor;
+			closestColorBox2.BackColor = closestColor;
+			
+
+			/*
+			Bitmap snap = new Bitmap(pictureBox1.Image);
+			var colorThief = new ColorThief.ColorThief();
+			var x = colorThief.GetColor(snap).Color;
+			closestColorBox.BackColor = System.Drawing.Color.FromArgb(x.R, x.G, x.B);
+			 */
+		}
+		
 		private double ColorDistance(Color c1, Color c2) {
-			return Math.Pow(Math.Pow((double) (c1.R - c2.R), 2.0) + Math.Pow((double) (c1.G - c2.G), 2.0) + Math.Pow((double) (c1.B - c2.B), 2.0), .5);
+			return Math.Pow(Math.Pow((double)(c1.R - c2.R), 2.0) + Math.Pow((double)(c1.G - c2.G), 2.0) + Math.Pow((double)(c1.B - c2.B), 2.0), .5);
 		}
+		
 	}
-
+	
 	public class ColorComparer : IComparer<Color> {
 		public int Compare(Color a, Color b) {
 			return Math.Sign(a.GetHue() - b.GetHue());
 		}
 	}
+	
 }
