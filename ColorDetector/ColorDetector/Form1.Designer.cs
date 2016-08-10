@@ -35,16 +35,19 @@
 			this.button2 = new System.Windows.Forms.Button();
 			this.button1 = new System.Windows.Forms.Button();
 			this.pictureBox1 = new System.Windows.Forms.PictureBox();
-			this.ColorButton = new System.Windows.Forms.Button();
+			this.AverageColorButton = new System.Windows.Forms.Button();
 			this.actualColorBox = new System.Windows.Forms.PictureBox();
 			this.ColorLabel = new System.Windows.Forms.Label();
 			this.closestColorBox = new System.Windows.Forms.PictureBox();
 			this.histBox = new System.Windows.Forms.PictureBox();
 			this.smoothedHistBox = new System.Windows.Forms.PictureBox();
 			this.saveButton = new System.Windows.Forms.Button();
-			this.compareButton = new System.Windows.Forms.Button();
+			this.guessButton = new System.Windows.Forms.Button();
 			this.similarityLabel = new System.Windows.Forms.Label();
-			this.textBox1 = new System.Windows.Forms.TextBox();
+			this.colorNameBox = new System.Windows.Forms.TextBox();
+			this.HueHistButton = new System.Windows.Forms.Button();
+			this.SatHistButton = new System.Windows.Forms.Button();
+			this.LumHistButton = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.ledTrackbar)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.gainTrackbar)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -191,20 +194,20 @@
 			this.pictureBox1.TabIndex = 26;
 			this.pictureBox1.TabStop = false;
 			// 
-			// ColorButton
+			// AverageColorButton
 			// 
-			this.ColorButton.Location = new System.Drawing.Point(448, 364);
-			this.ColorButton.Name = "ColorButton";
-			this.ColorButton.Size = new System.Drawing.Size(75, 42);
-			this.ColorButton.TabIndex = 38;
-			this.ColorButton.Text = "Check Color";
-			this.ColorButton.UseVisualStyleBackColor = true;
-			this.ColorButton.Click += new System.EventHandler(this.ColorButton_Click);
+			this.AverageColorButton.Location = new System.Drawing.Point(352, 406);
+			this.AverageColorButton.Name = "AverageColorButton";
+			this.AverageColorButton.Size = new System.Drawing.Size(75, 42);
+			this.AverageColorButton.TabIndex = 38;
+			this.AverageColorButton.Text = "Check Color";
+			this.AverageColorButton.UseVisualStyleBackColor = true;
+			this.AverageColorButton.Click += new System.EventHandler(this.AverageColorButton_Click);
 			// 
 			// actualColorBox
 			// 
 			this.actualColorBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.actualColorBox.Location = new System.Drawing.Point(355, 475);
+			this.actualColorBox.Location = new System.Drawing.Point(250, 482);
 			this.actualColorBox.Margin = new System.Windows.Forms.Padding(4);
 			this.actualColorBox.Name = "actualColorBox";
 			this.actualColorBox.Size = new System.Drawing.Size(101, 94);
@@ -214,7 +217,7 @@
 			// ColorLabel
 			// 
 			this.ColorLabel.AutoSize = true;
-			this.ColorLabel.Location = new System.Drawing.Point(352, 454);
+			this.ColorLabel.Location = new System.Drawing.Point(422, 461);
 			this.ColorLabel.Name = "ColorLabel";
 			this.ColorLabel.Size = new System.Drawing.Size(23, 17);
 			this.ColorLabel.TabIndex = 40;
@@ -223,7 +226,7 @@
 			// closestColorBox
 			// 
 			this.closestColorBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.closestColorBox.Location = new System.Drawing.Point(520, 475);
+			this.closestColorBox.Location = new System.Drawing.Point(415, 482);
 			this.closestColorBox.Margin = new System.Windows.Forms.Padding(4);
 			this.closestColorBox.Name = "closestColorBox";
 			this.closestColorBox.Size = new System.Drawing.Size(101, 94);
@@ -260,47 +263,80 @@
 			this.saveButton.UseVisualStyleBackColor = true;
 			this.saveButton.Click += new System.EventHandler(this.saveButton_Click);
 			// 
-			// compareButton
+			// guessButton
 			// 
-			this.compareButton.Location = new System.Drawing.Point(68, 423);
-			this.compareButton.Name = "compareButton";
-			this.compareButton.Size = new System.Drawing.Size(111, 42);
-			this.compareButton.TabIndex = 45;
-			this.compareButton.Text = "Compare";
-			this.compareButton.UseVisualStyleBackColor = true;
-			this.compareButton.Click += new System.EventHandler(this.compareButton_Click);
+			this.guessButton.Location = new System.Drawing.Point(68, 423);
+			this.guessButton.Name = "guessButton";
+			this.guessButton.Size = new System.Drawing.Size(111, 42);
+			this.guessButton.TabIndex = 45;
+			this.guessButton.Text = "Guess";
+			this.guessButton.UseVisualStyleBackColor = true;
+			this.guessButton.Click += new System.EventHandler(this.guessButton_Click);
 			// 
 			// similarityLabel
 			// 
 			this.similarityLabel.AutoSize = true;
-			this.similarityLabel.Location = new System.Drawing.Point(93, 524);
+			this.similarityLabel.Location = new System.Drawing.Point(102, 525);
 			this.similarityLabel.Name = "similarityLabel";
 			this.similarityLabel.Size = new System.Drawing.Size(23, 17);
 			this.similarityLabel.TabIndex = 46;
 			this.similarityLabel.Text = "---";
 			// 
-			// textBox1
+			// colorNameBox
 			// 
-			this.textBox1.Location = new System.Drawing.Point(68, 604);
-			this.textBox1.Name = "textBox1";
-			this.textBox1.Size = new System.Drawing.Size(100, 22);
-			this.textBox1.TabIndex = 47;
+			this.colorNameBox.Location = new System.Drawing.Point(68, 604);
+			this.colorNameBox.Name = "colorNameBox";
+			this.colorNameBox.Size = new System.Drawing.Size(100, 22);
+			this.colorNameBox.TabIndex = 47;
+			// 
+			// HueHistButton
+			// 
+			this.HueHistButton.Location = new System.Drawing.Point(570, 341);
+			this.HueHistButton.Name = "HueHistButton";
+			this.HueHistButton.Size = new System.Drawing.Size(91, 42);
+			this.HueHistButton.TabIndex = 48;
+			this.HueHistButton.Text = "Hue Histogram";
+			this.HueHistButton.UseVisualStyleBackColor = true;
+			this.HueHistButton.Click += new System.EventHandler(this.HueHistButton_Click);
+			// 
+			// SatHistButton
+			// 
+			this.SatHistButton.Location = new System.Drawing.Point(570, 406);
+			this.SatHistButton.Name = "SatHistButton";
+			this.SatHistButton.Size = new System.Drawing.Size(91, 42);
+			this.SatHistButton.TabIndex = 49;
+			this.SatHistButton.Text = "Sat Histogram";
+			this.SatHistButton.UseVisualStyleBackColor = true;
+			this.SatHistButton.Click += new System.EventHandler(this.SatHistButton_Click);
+			// 
+			// LumHistButton
+			// 
+			this.LumHistButton.Location = new System.Drawing.Point(570, 473);
+			this.LumHistButton.Name = "LumHistButton";
+			this.LumHistButton.Size = new System.Drawing.Size(91, 42);
+			this.LumHistButton.TabIndex = 50;
+			this.LumHistButton.Text = "Lum Histogram";
+			this.LumHistButton.UseVisualStyleBackColor = true;
+			this.LumHistButton.Click += new System.EventHandler(this.LumHistButton_Click);
 			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(1400, 825);
-			this.Controls.Add(this.textBox1);
+			this.Controls.Add(this.LumHistButton);
+			this.Controls.Add(this.SatHistButton);
+			this.Controls.Add(this.HueHistButton);
+			this.Controls.Add(this.colorNameBox);
 			this.Controls.Add(this.similarityLabel);
-			this.Controls.Add(this.compareButton);
+			this.Controls.Add(this.guessButton);
 			this.Controls.Add(this.saveButton);
 			this.Controls.Add(this.smoothedHistBox);
 			this.Controls.Add(this.histBox);
 			this.Controls.Add(this.closestColorBox);
 			this.Controls.Add(this.ColorLabel);
 			this.Controls.Add(this.actualColorBox);
-			this.Controls.Add(this.ColorButton);
+			this.Controls.Add(this.AverageColorButton);
 			this.Controls.Add(this.ledTrackbar);
 			this.Controls.Add(this.ledCheckbox);
 			this.Controls.Add(this.aecCheckbox);
@@ -341,16 +377,19 @@
 		private System.Windows.Forms.Button button2;
 		private System.Windows.Forms.Button button1;
 		private System.Windows.Forms.PictureBox pictureBox1;
-		private System.Windows.Forms.Button ColorButton;
+		private System.Windows.Forms.Button AverageColorButton;
 		private System.Windows.Forms.PictureBox actualColorBox;
 		private System.Windows.Forms.Label ColorLabel;
 		private System.Windows.Forms.PictureBox closestColorBox;
 		private System.Windows.Forms.PictureBox histBox;
 		private System.Windows.Forms.PictureBox smoothedHistBox;
 		private System.Windows.Forms.Button saveButton;
-		private System.Windows.Forms.Button compareButton;
+		private System.Windows.Forms.Button guessButton;
 		private System.Windows.Forms.Label similarityLabel;
-		private System.Windows.Forms.TextBox textBox1;
+		private System.Windows.Forms.TextBox colorNameBox;
+		private System.Windows.Forms.Button HueHistButton;
+		private System.Windows.Forms.Button SatHistButton;
+		private System.Windows.Forms.Button LumHistButton;
 
 	}
 }
