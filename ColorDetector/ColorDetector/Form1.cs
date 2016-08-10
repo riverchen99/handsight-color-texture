@@ -13,6 +13,9 @@ using System.IO;
 using System.Speech.Synthesis;
 using System.Text.RegularExpressions;
 using System.Threading;
+using Emgu.CV;
+using Emgu.CV.Structure;
+using Emgu.CV.UI;
 //using ColorThief;
 namespace ColorDetector {
 	public partial class Form1 : Form {
@@ -51,6 +54,8 @@ namespace ColorDetector {
 										KnownColor.WindowText};
 		private List<KnownColor> knownColors = new List<KnownColor>((KnownColor[])Enum.GetValues(typeof(KnownColor)));
 		NanEye2DNanoUSB2Provider provider;
+		List<int> histData;
+		List<int> smoothedHistData;
 		private SpeechSynthesizer reader = new SpeechSynthesizer();
 
 		public Form1() {
@@ -209,7 +214,7 @@ namespace ColorDetector {
 
 			// display average rgb color and closest knowncolor match
 			Color avgRGBColor = Color.FromArgb(totalR / pxCount, totalG / pxCount, totalB / pxCount);
-			Color closestColor = Color.FromKnownColor(KnownColor.Black);
+			Color closestColor = new Color();
 			foreach (KnownColor c in knownColors) {
 				closestColor = RGBColorDistance(avgRGBColor, Color.FromKnownColor(c)) < RGBColorDistance(avgRGBColor, closestColor) ? Color.FromKnownColor(c) : closestColor;
 			}
@@ -219,11 +224,13 @@ namespace ColorDetector {
 			closestColorBox.BackColor = closestColor;
 
 
-			int bins = 108;
+			int bins = 36;
+
+
 			// generate histogram
 			var sortedKeys = colors.Keys.ToList();
 			sortedKeys.Sort(new ColorComparer());
-			List<int> histData = new List<int>();
+			histData = new List<int>(new int[bins]);
 			foreach (Color c in sortedKeys) {
 				if (histData.Count > c.GetHue() * (bins/360.0)) {
 					histData[(int)(c.GetHue() * (bins/360.0))] += colors[c];
@@ -231,6 +238,7 @@ namespace ColorDetector {
 					histData.Add(colors[c]);
 				}
 			}
+
 
 			Bitmap histImg = new Bitmap(625, 360);
 			histBox.Image = histImg;
@@ -241,34 +249,12 @@ namespace ColorDetector {
 			}
 			
 
-
-
-			//smooth histogram
-			/*
-			Dictionary<Color, int> smoothedColors = new Dictionary<Color, int>();
-			smoothedColors[sortedKeys[0]] = (colors[sortedKeys.Last()] + colors[sortedKeys[1]]) / 2;
-			smoothedColors[sortedKeys.Last()] = (colors[sortedKeys[sortedKeys.Count - 2]] + colors[sortedKeys[0]]) / 2;
-			for (int c = 1; c < sortedKeys.Count - 1; c++) {
-				smoothedColors[sortedKeys[c]] = (colors[sortedKeys[c - 1]] +  colors[sortedKeys[c + 1]]) / 2;
-			}
-
-			sortedKeys = smoothedColors.Keys.ToList();
-			sortedKeys.Sort(new ColorComparer());
-			List<int> smoothedHistData = new List<int>();
-			foreach (Color c in sortedKeys) {
-				if (smoothedHistData.Count > c.GetHue() * (bins/360.0)) {
-					smoothedHistData[(int)(c.GetHue() * (bins/360.0))] += smoothedColors[c];
-				} else {
-					smoothedHistData.Add(smoothedColors[c]);
-				}
-			}
-			*/
-
+			//smoothing
 			List<int> smoothedHistData = new List<int>(histData);
-			smoothedHistData[0] = (histData.Last() + histData[1]) / 2;
-			smoothedHistData[smoothedHistData.Count-1] = (histData[histData.Count - 2] + histData[0]) / 2;
+			smoothedHistData[0] = (histData.Last() + histData[0] + histData[1]) / 3;
+			smoothedHistData[smoothedHistData.Count-1] = (histData[histData.Count - 2] + histData.Last() + histData[0]) / 3;
 			for (int bin = 1; bin < histData.Count - 1; bin++) {
-				smoothedHistData[bin] = (histData[bin - 1] + histData[bin + 1]) / 2;
+				smoothedHistData[bin] = (histData[bin - 1] + histData[bin] + histData[bin + 1]) / 3;
 			}
 
 
@@ -279,37 +265,10 @@ namespace ColorDetector {
 			for (int bin = 0; bin < smoothedHistData.Count; bin++) {
 				g2.FillRectangle(new SolidBrush(ColorFromHSL(1.0 * bin / bins, 1.0, .5)), new Rectangle(0, bin * (360 / bins), smoothedHistData[bin] / 100, 360 / bins));
 			}
+
+
+			Image<Bgr, Byte> img = new Image<Bgr, Byte>(new Bitmap(pictureBox1.Image)); // what is going on
 			
-
-			//closest color from histogram
-			double commonHue = 0;
-			for (int bin = 0; bin < histData.Count; bin++) {
-				if (histData[bin] == histData.Max()) {
-					commonHue = bin;
-				}
-			}
-			commonHue = commonHue / bins * 360.0;
-
-			Color closestKnownHue = new Color();
-			foreach (KnownColor c in knownColors) {
-				closestKnownHue = Math.Abs(closestKnownHue.GetHue() - commonHue) > Math.Abs(Color.FromKnownColor(c).GetHue() - commonHue) ? Color.FromKnownColor(c) : closestKnownHue;
-			}
-
-			ColorLabel2.Text = Regex.Replace(closestKnownHue.Name, "(\\B[A-Z])", " $1");
-			//TTS(Regex.Replace(closestKnownHue.Name, "(\\B[A-Z])", " $1"));
-			commonColorBox.BackColor = ColorFromHSL(1.0 * commonHue / bins, totalS/pxCount, totalL/pxCount);
-			closestColorBox2.BackColor = closestKnownHue;
-
-			String name = "";
-			List<String> hueNames = new List<String>() { "Red", "Orange", "Yellow", "Chartreuse", "Green", "Spring Green", "Cyan", "Azure", "Blue", "Violet", "Magenta", "Rose" };
-			List<String> saturationDescriptors = new List<String>() { "Faded", "", "Bright" };
-			List<String> luminosityDescriptors = new List<String>() { "Dark", "", "Light" };
-
-			name += luminosityDescriptors[(int)(totalL / pxCount / .33)];
-			if (name.Equals("")) { name += saturationDescriptors[(int)(totalL / pxCount / .33)]; }
-			name += (" " + hueNames[(int) ((commonHue + 15) % 360) / 30]);
-			Console.WriteLine(commonHue);
-			ColorNameLabel.Text = name;
 			
 
 			/*
@@ -370,5 +329,27 @@ namespace ColorDetector {
 			}
 		}
 
+		Dictionary<List<int>, String> savedTextures = new Dictionary<List<int>,string>();
+
+		private void saveButton_Click(object sender, EventArgs e) {
+			savedTextures.Add(new List<int>(histData), textBox1.Text);
+		}
+
+		private void compareButton_Click(object sender, EventArgs e) {
+			ColorButton_Click(null, null);
+			int minDif = Int32.MaxValue;
+			string closestName = "";
+			foreach (KeyValuePair<List<int>, String> textureHistData in savedTextures) {
+				int s = 0;
+				for (int bin = 0; bin < textureHistData.Key.Count; bin++) {
+					s += Math.Abs(textureHistData.Key[bin] - histData[bin]);
+				}
+				if (s < minDif) {
+					minDif = s;
+					closestName = textureHistData.Value;
+				}
+			}
+			similarityLabel.Text = closestName;
+		}
 	}
 }

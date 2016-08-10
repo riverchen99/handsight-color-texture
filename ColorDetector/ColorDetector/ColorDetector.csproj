@@ -92,6 +92,12 @@
       <HintPath>..\packages\ksemenenko.ColorThief.1.0.0.0\lib\net45\ColorThief.Desktop.v45.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Emgu.CV.UI">
+      <HintPath>..\..\dependencies\Emgu.CV.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="Emgu.CV.World">
+      <HintPath>..\..\dependencies\Emgu.CV.World.dll</HintPath>
+    </Reference>
     <Reference Include="GeneralFpgaAlgorithms, Version=1.2.0.0, Culture=neutral, processorArchitecture=AMD64">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\dependencies\x86\GeneralFpgaAlgorithms.dll</HintPath>
