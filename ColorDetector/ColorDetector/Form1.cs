@@ -60,6 +60,9 @@ namespace ColorDetector {
 		List<Tuple<List<int>, List<int>, List<int>, String>> savedMaterials = new List<Tuple<List<int>, List<int>, List<int>, string>>();
 		private SpeechSynthesizer reader = new SpeechSynthesizer();
 		string lockObj = "lockObj";
+		int totalR = 0, totalG = 0, totalB = 0;
+		float totalH = 0, totalS = 0, totalL = 0;
+		int pxCount;// = 62500;
 
 		public Form1() {
 			Awaiba.Drivers.Grabbers.Location.Paths.FpgaFilesDirectory = @"C:\Users\Makeability\Source\Repos\handsight-color-texture\dependencies\fpga files\";
@@ -198,6 +201,9 @@ namespace ColorDetector {
 			satHistData = new List<int>(new int[bins]);
 			lumHistData = new List<int>(new int[bins]);
 			colors = new List<Color>();
+			totalR = totalG = totalB = 0;
+			totalH = totalS = totalL = 0;
+			pxCount = 0;
 			Bitmap snap = new Bitmap(pictureBox1.Image);
 			for (int i = 0; i < snap.Width; i++) {
 				for (int j = 0; j < snap.Height; j++) {
@@ -206,6 +212,15 @@ namespace ColorDetector {
 					hueHistData[(int)(c.GetHue() * (bins / 360.0))]++;
 					satHistData[(int)((c.GetSaturation() - .00001) * bins)]++; // prevent c.GetSaturation() = 1
 					lumHistData[(int)(c.GetBrightness() * bins)]++;
+					if (i > 100 && i < 150 && j > 100 && j < 150) {
+						totalR += c.R;
+						totalG += c.G;
+						totalB += c.B;
+						totalH += c.GetHue();
+						totalS += c.GetSaturation();
+						totalL += c.GetBrightness();
+						pxCount++;
+					}
 				}
 			}
 		}
@@ -306,22 +321,7 @@ namespace ColorDetector {
 		}
 
 		private void AverageColorButton_Click(object sender, EventArgs e) {
-			int totalR = 0, totalG = 0, totalB = 0;
-			float totalH = 0, totalS = 0, totalL = 0;
-			int pxCount = 62500;
-
 			GetPixels();
-			foreach (Color c in colors) {
-				if (c.GetBrightness() > .3 && c.GetBrightness() < .9) {
-					totalR += c.R;
-					totalG += c.G;
-					totalB += c.B;
-				}
-				totalH += c.GetHue();
-				totalS += c.GetSaturation();
-				totalL += c.GetBrightness();
-			}
-
 			// display average rgb color and closest knowncolor match
 			Color avgRGBColor = Color.FromArgb(totalR / pxCount, totalG / pxCount, totalB / pxCount);
 			Color closestColor = new Color();
