@@ -68,25 +68,25 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AviFile, Version=1.2.0.0, Culture=neutral, processorArchitecture=AMD64">
+    <Reference Include="AviFile, Version=1.2.0.0, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\dependencies\x86\AviFile.dll</HintPath>
+      <HintPath>..\..\dependencies\x86\AviFile.dll</HintPath>
     </Reference>
-    <Reference Include="Awaiba, Version=1.7.3.4, Culture=neutral, processorArchitecture=AMD64">
+    <Reference Include="Awaiba, Version=1.7.3.4, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\dependencies\x86\Awaiba.dll</HintPath>
+      <HintPath>..\..\dependencies\x86\Awaiba.dll</HintPath>
     </Reference>
-    <Reference Include="awcorecs, Version=1.5.2.1, Culture=neutral, processorArchitecture=AMD64">
+    <Reference Include="awcorecs, Version=1.5.2.1, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\dependencies\x86\awcorecs.dll</HintPath>
+      <HintPath>..\..\dependencies\x86\awcorecs.dll</HintPath>
     </Reference>
-    <Reference Include="AwFrameProcessing, Version=1.9.2.2, Culture=neutral, processorArchitecture=AMD64">
+    <Reference Include="AwFrameProcessing, Version=1.9.2.2, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\dependencies\x86\AwFrameProcessing.dll</HintPath>
+      <HintPath>..\..\dependencies\x86\AwFrameProcessing.dll</HintPath>
     </Reference>
     <Reference Include="CesysProvider, Version=1.5.2.1, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\dependencies\x86\CesysProvider.dll</HintPath>
+      <HintPath>..\..\dependencies\x86\CesysProvider.dll</HintPath>
     </Reference>
     <Reference Include="ColorThief.Desktop.v45, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\ksemenenko.ColorThief.1.0.0.0\lib\net45\ColorThief.Desktop.v45.dll</HintPath>
@@ -98,9 +98,9 @@
     <Reference Include="Emgu.CV.World">
       <HintPath>..\..\dependencies\Emgu.CV.World.dll</HintPath>
     </Reference>
-    <Reference Include="GeneralFpgaAlgorithms, Version=1.2.0.0, Culture=neutral, processorArchitecture=AMD64">
+    <Reference Include="GeneralFpgaAlgorithms, Version=1.2.0.0, Culture=neutral, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\dependencies\x86\GeneralFpgaAlgorithms.dll</HintPath>
+      <HintPath>..\..\dependencies\x86\GeneralFpgaAlgorithms.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Activities" />
