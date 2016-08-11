@@ -19,7 +19,7 @@ using Emgu.CV.UI;
 //using ColorThief;
 namespace ColorDetector {
 	public partial class Form1 : Form {
-		private KnownColor[] toRemove = {KnownColor.ActiveBorder,
+		private KnownColor[] toRemove = {KnownColor.ActiveBorder, // system colors
 										KnownColor.ActiveCaption,
 										KnownColor.ActiveCaptionText,
 										KnownColor.AppWorkspace,
@@ -53,14 +53,13 @@ namespace ColorDetector {
 										KnownColor.WindowFrame, 
 										KnownColor.WindowText};
 		private List<KnownColor> knownColors = new List<KnownColor>((KnownColor[])Enum.GetValues(typeof(KnownColor)));
+		static int bins = 72;
 		NanEye2DNanoUSB2Provider provider;
-		List<int> histData;
-		List<int> hueHistData, satHistData, lumHistData;
-		List<int> smoothedHistData;
+		List<int> hueHistData = new List<int>(new int[bins]), satHistData = new List<int>(new int[bins]), lumHistData = new List<int>(new int[bins]);
+		List<Color> colors = new List<Color>();
+		List<Tuple<List<int>, List<int>, List<int>, String>> savedMaterials = new List<Tuple<List<int>, List<int>, List<int>, string>>();
 		private SpeechSynthesizer reader = new SpeechSynthesizer();
-		//Dictionary<List<int>, String> savedTextures = new Dictionary<List<int>, string>();
-		List<Color> colors;
-		int bins = 72;
+		string lockObj = "lockObj";
 
 		public Form1() {
 			Awaiba.Drivers.Grabbers.Location.Paths.FpgaFilesDirectory = @"C:\Users\Makeability\Source\Repos\handsight-color-texture\dependencies\fpga files\";
@@ -88,7 +87,7 @@ namespace ColorDetector {
 			provider.AutomaticExpControl().FrameNumber = 0;
 
 			///Enable the algorithm (value 0); Disable -> value 1;
-			provider.AutomaticExpControl().Enabled = 0;
+			provider.AutomaticExpControl().Enabled = 1;
 
 			///The ShowROI will show the Region of Interest and the current values of the Gain and Exposure
 			provider.AutomaticExpControl().ShowROI = 0;
@@ -125,7 +124,6 @@ namespace ColorDetector {
 			Console.WriteLine(e.ex.Message);
 		}
 
-		string lockObj = "lockObj";
 		private void provider_ImageProcessed(object sender, OnImageReceivedBitmapEventArgs e) {
 			if (Monitor.TryEnter(lockObj)) {
 				try {
@@ -196,52 +194,47 @@ namespace ColorDetector {
 		}
 
 		private void GetPixels() {
+			hueHistData = new List<int>(new int[bins]);
+			satHistData = new List<int>(new int[bins]);
+			lumHistData = new List<int>(new int[bins]);
 			colors = new List<Color>();
 			Bitmap snap = new Bitmap(pictureBox1.Image);
 			for (int i = 0; i < snap.Width; i++) {
-				for (int j = 0; j < snap.Height; j++) {					
-					colors.Add(snap.GetPixel(i, j));
-					hueHistData[(int)(snap.GetPixel(i, j).GetHue() * (bins / 360.0))]++;
+				for (int j = 0; j < snap.Height; j++) {
+					Color c = snap.GetPixel(i, j);
+					colors.Add(c);
+					hueHistData[(int)(c.GetHue() * (bins / 360.0))]++;
 					satHistData[(int)((c.GetSaturation() - .00001) * bins)]++; // prevent c.GetSaturation() = 1
 					lumHistData[(int)(c.GetBrightness() * bins)]++;
 				}
 			}
 		}
 
-		private void AverageColorButton_Click(object sender, EventArgs e) {
-			int totalR = 0, totalG = 0, totalB = 0;
-			float totalH = 0, totalS = 0, totalL = 0;
-			int pxCount = 62500;
+		private void GenerateHist(List<int> histData) {
+			Bitmap histImg = new Bitmap(625, 360);
+			histBox.Image = histImg;
+			Graphics g1 = Graphics.FromImage(histImg);
 
-			GetPixels();
-			foreach (Color c in colors) {
-				totalR += c.R;
-				totalG += c.G;
-				totalB += c.B;
-				totalH += c.GetHue();
-				totalS += c.GetSaturation();
-				totalL += c.GetBrightness();
+			for (int bin = 0; bin < histData.Count; bin++) {
+				g1.FillRectangle(new SolidBrush(ColorFromHSL(1.0 * bin / bins, 1.0, .5)), new Rectangle(0, bin * (360 / bins), histData[bin] / 100, 360 / bins));
 			}
 
-			// display average rgb color and closest knowncolor match
-			Color avgRGBColor = Color.FromArgb(totalR / pxCount, totalG / pxCount, totalB / pxCount);
-			Color closestColor = new Color();
-			foreach (KnownColor c in knownColors) {
-				closestColor = RGBColorDistance(avgRGBColor, Color.FromKnownColor(c)) < RGBColorDistance(avgRGBColor, closestColor) ? Color.FromKnownColor(c) : closestColor;
+			//smoothing
+			List<int> smoothedHistData = new List<int>(histData);
+			smoothedHistData[0] = (histData.Last() + histData[0] + histData[1]) / 3;
+			smoothedHistData[smoothedHistData.Count - 1] = (histData[histData.Count - 2] + histData.Last() + histData[0]) / 3;
+			for (int bin = 1; bin < histData.Count - 1; bin++) {
+				smoothedHistData[bin] = (histData[bin - 1] + histData[bin] + histData[bin + 1]) / 3;
 			}
-			ColorLabel.Text = Regex.Replace(closestColor.Name, "(\\B[A-Z])", " $1");
-			//TTS(Regex.Replace(closestColor.Name, "(\\B[A-Z])", " $1"));
-			actualColorBox.BackColor = avgRGBColor;
-			closestColorBox.BackColor = closestColor;
 
-			//Image<Bgr, Byte> img = new Image<Bgr, Byte>(new Bitmap(pictureBox1.Image)); // what is going on
+			//generate smoothed histogram
+			Bitmap histSmoothedImg = new Bitmap(625, 360);
+			smoothedHistBox.Image = histSmoothedImg;
+			Graphics g2 = Graphics.FromImage(histSmoothedImg);
 
-			/*
-			Bitmap snap = new Bitmap(pictureBox1.Image);
-			var colorThief = new ColorThief.ColorThief();
-			var x = colorThief.GetColor(snap).Color;
-			closestColorBox.BackColor = System.Drawing.Color.FromArgb(x.R, x.G, x.B);
-			 */
+			for (int bin = 0; bin < smoothedHistData.Count; bin++) {
+				g2.FillRectangle(new SolidBrush(ColorFromHSL(1.0 * bin / bins, 1.0, .5)), new Rectangle(0, bin * (360 / bins), smoothedHistData[bin] / 100, 360 / bins));
+			}
 		}
 
 		private double RGBColorDistance(Color c1, Color c2) {
@@ -287,89 +280,82 @@ namespace ColorDetector {
 				return temp1;
 		}
 
-		/*
-		public class ColorComparer : IComparer<Color> {
-			public int Compare(Color a, Color b) {
-				return Math.Sign(a.GetHue() - b.GetHue());
-			}
-		}
-		*/
-
-		List<Tuple<List<int>, List<int>, List<int>, String>> savedMaterials;
 		private void saveButton_Click(object sender, EventArgs e) {
-
-			savedMaterials.Add(new Tuple<List<int>, List<int>, List<int>, String>(hHistData, sHistData, lHistData, colorNameBox.Text);
+			GetPixels();
+			savedMaterials.Add(new Tuple<List<int>, List<int>, List<int>, String>(new List<int>(hueHistData), new List<int>(satHistData), new List<int>(lumHistData), colorNameBox.Text));
 			colorNameBox.Text = "";
 		}
 
 		private void guessButton_Click(object sender, EventArgs e) {
+			GetPixels();
 			int minDif = Int32.MaxValue;
 			string closestName = "";
 			foreach (Tuple<List<int>, List<int>, List<int>, String> material in savedMaterials) {
 				int s = 0;
-				for (int bin = 0; bin < material.Item1.Count; bin++) {
-					s += Math.Abs(textureHistData.Key[bin] - histData[bin]);
+				for (int bin = 0; bin < bins; bin++) {
+					s += Math.Abs(material.Item1[bin] - hueHistData[bin]);
+					s += Math.Abs(material.Item2[bin] - satHistData[bin]);
+					s += Math.Abs(material.Item3[bin] - lumHistData[bin]);
 				}
 				if (s < minDif) {
 					minDif = s;
-					closestName = textureHistData.Value;
+					closestName = material.Item4;
 				}
 			}
 			similarityLabel.Text = closestName;
 		}
 
-		private void GenerateHist() {
-			Bitmap histImg = new Bitmap(625, 360);
-			histBox.Image = histImg;
-			Graphics g1 = Graphics.FromImage(histImg);
+		private void AverageColorButton_Click(object sender, EventArgs e) {
+			int totalR = 0, totalG = 0, totalB = 0;
+			float totalH = 0, totalS = 0, totalL = 0;
+			int pxCount = 62500;
 
-			for (int bin = 0; bin < histData.Count; bin++) {
-				g1.FillRectangle(new SolidBrush(ColorFromHSL(1.0 * bin / bins, 1.0, .5)), new Rectangle(0, bin * (360 / bins), histData[bin] / 100, 360 / bins));
+			GetPixels();
+			foreach (Color c in colors) {
+				if (c.GetBrightness() > .3 && c.GetBrightness() < .9) {
+					totalR += c.R;
+					totalG += c.G;
+					totalB += c.B;
+				}
+				totalH += c.GetHue();
+				totalS += c.GetSaturation();
+				totalL += c.GetBrightness();
 			}
 
-			//smoothing
-			smoothedHistData = new List<int>(histData);
-			smoothedHistData[0] = (histData.Last() + histData[0] + histData[1]) / 3;
-			smoothedHistData[smoothedHistData.Count - 1] = (histData[histData.Count - 2] + histData.Last() + histData[0]) / 3;
-			for (int bin = 1; bin < histData.Count - 1; bin++) {
-				smoothedHistData[bin] = (histData[bin - 1] + histData[bin] + histData[bin + 1]) / 3;
+			// display average rgb color and closest knowncolor match
+			Color avgRGBColor = Color.FromArgb(totalR / pxCount, totalG / pxCount, totalB / pxCount);
+			Color closestColor = new Color();
+			foreach (KnownColor c in knownColors) {
+				closestColor = RGBColorDistance(avgRGBColor, Color.FromKnownColor(c)) < RGBColorDistance(avgRGBColor, closestColor) ? Color.FromKnownColor(c) : closestColor;
 			}
+			ColorLabel.Text = Regex.Replace(closestColor.Name, "(\\B[A-Z])", " $1");
+			//TTS(Regex.Replace(closestColor.Name, "(\\B[A-Z])", " $1"));
+			actualColorBox.BackColor = avgRGBColor;
+			closestColorBox.BackColor = closestColor;
 
-			//generate smoothed histogram
-			Bitmap histSmoothedImg = new Bitmap(625, 360);
-			smoothedHistBox.Image = histSmoothedImg;
-			Graphics g2 = Graphics.FromImage(histSmoothedImg);
+			//Image<Bgr, Byte> img = new Image<Bgr, Byte>(new Bitmap(pictureBox1.Image)); // what is going on
 
-			for (int bin = 0; bin < smoothedHistData.Count; bin++) {
-				g2.FillRectangle(new SolidBrush(ColorFromHSL(1.0 * bin / bins, 1.0, .5)), new Rectangle(0, bin * (360 / bins), smoothedHistData[bin] / 100, 360 / bins));
-			}
+			/*
+			Bitmap snap = new Bitmap(pictureBox1.Image);
+			var colorThief = new ColorThief.ColorThief();
+			var x = colorThief.GetColor(snap).Color;
+			closestColorBox.BackColor = System.Drawing.Color.FromArgb(x.R, x.G, x.B);
+			 */
 		}
 
 		private void HueHistButton_Click(object sender, EventArgs e) {
 			GetPixels();
-			histData = new List<int>(new int[bins]);
-			foreach (Color c in colors) {
-				histData[(int)(c.GetHue() * (bins / 360.0))]++;
-			}
-			GenerateHist();
+			GenerateHist(hueHistData);
 		}
 
 		private void SatHistButton_Click(object sender, EventArgs e) {
 			GetPixels();
-			histData = new List<int>(new int[bins]);
-			foreach (Color c in colors) {
-				histData[(int)((c.GetSaturation()-.00001) * bins)]++; // prevent c.GetSaturation() = 1
-			}
-			GenerateHist();
+			GenerateHist(satHistData);
 		}
 
 		private void LumHistButton_Click(object sender, EventArgs e) {
 			GetPixels();
-			histData = new List<int>(new int[bins]);
-			foreach (Color c in colors) {
-				histData[(int)(c.GetBrightness() * bins)]++;
-			}
-			GenerateHist();
+			GenerateHist(lumHistData);
 		}
 	}
 }
