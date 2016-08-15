@@ -16,6 +16,7 @@ using System.Threading;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using Emgu.CV.UI;
+
 //using ColorThief;
 namespace ColorDetector {
 	public partial class Form1 : Form {
