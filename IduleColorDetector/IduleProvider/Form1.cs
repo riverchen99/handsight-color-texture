@@ -77,7 +77,7 @@ namespace IduleProvider {
 			provider.ImageProcessed += provider_ImageProcessed;
 			provider.ImageProcessed2 += provider_ImageProcessed;
 #endif
-			provider.WriteRegister(new NanEyeGSRegisterPayload(false, 0x05, true, 0, 50));
+			provider.WriteRegister(new NanEyeGSRegisterPayload(false, 0x05, true, 0, trackBar1.Value));
 			provider.WriteRegister(new NanEyeGSRegisterPayload(false, 0x06, true, 0, 255));
 
 			provider.Exception += camera_Exception;
@@ -238,7 +238,7 @@ namespace IduleProvider {
 		}
 
 		private void CannyButton_Click(object sender, EventArgs e) {
-			
+			// gaussian blur
 			Image<Bgr, Byte> img = new Image<Bgr, byte>(displayAdapter1.Image.ConvertToBitmap());
 			Image<Gray, byte> filteredImg = img.Convert<Gray, byte>().PyrDown().PyrUp();
 			Image<Gray, byte> cannyImg = filteredImg.Canny(minTrackBar.Value, maxTrackBar.Value);
@@ -248,53 +248,57 @@ namespace IduleProvider {
 				Image<Bgr, byte> tempImg = cannyImg.Convert<Bgr, byte>();
 				Emgu.CV.Util.VectorOfPointF points = new Emgu.CV.Util.VectorOfPointF();
 				CvInvoke.HoughLines(cannyImg, points, 1, Math.PI / 180.0, houghThreshholdBar.Value);
-				for (int i = 0; i < points.Size - 1; i++) {
-					double a = Math.Cos(points[i].Y);
-					double b = Math.Sin(points[i].Y);
-					double x0 = points[i].X * a;
-					double y0 = points[i].X * b;
-					int x1 = (int)(x0 + 1000 * (-b));
-					int y1 = (int)(y0 + 1000 * (a));
-					int x2 = (int)(x0 + 1000 * (-b));
-					int y2 = (int)(y0 + 1000 * (b));
-					tempImg.Draw(new LineSegment2D(new Point(x1, y1), new Point(x2, y2)), new Bgr(Color.Green), 2);
+
+				PointF[] pointArray = points.ToArray();
+				List<polarEq> polarEqList = new List<polarEq>();
+				foreach (PointF p in pointArray) {
+					if (p.Y != 0) { // remove vertical lines (side)
+						polarEqList.Add(new polarEq(p.X, p.Y));
+					}
 				}
-				
+				polarEqList = polarEqList.OrderBy(list => list.theta).ToList();
+
+				List<int> splitIndices = new List<int>() { -1 };
+				for (int i = 0; i < polarEqList.Count - 1; i++) {
+					if ((polarEqList[i + 1].theta - polarEqList[i].theta) > .1) {
+						splitIndices.Add(i);
+					}
+				}
+
+
+				List<List<polarEq>> eqGroups = new List<List<polarEq>>();
+				for (int i = 0; i < splitIndices.Count - 1; i++) {
+					eqGroups.Add(polarEqList.Skip(splitIndices[i] + 1).Take(splitIndices[i + 1] - splitIndices[i]).ToList<polarEq>());
+				}
+				if (polarEqList[polarEqList.Count - 1].theta - polarEqList[0].theta < (2 * Math.PI - 1)) { // doesn't loop around
+					eqGroups.Add(polarEqList.Skip(splitIndices[splitIndices.Count - 1] + 1).Take(polarEqList.Count - splitIndices[splitIndices.Count - 1]).ToList<polarEq>());
+				} else { // test this
+					eqGroups[0] = eqGroups[0].Concat(polarEqList.Skip(splitIndices[splitIndices.Count - 1] + 1).Take(polarEqList.Count - splitIndices[splitIndices.Count - 1]).ToList<polarEq>()).ToList<polarEq>();
+				}
+				outputLabel.Text = "";
+				foreach (List<polarEq> group in eqGroups) {
+					foreach (polarEq eq in group) {
+						outputLabel.Text += eq + "\n";
+					}
+					outputLabel.Text += "\n";
+				}
+
+
+					foreach (polarEq eq in polarEqList) {
+						// rho, theta
+						// drawing
+						double a = Math.Cos(eq.theta);
+						double b = Math.Sin(eq.theta);
+						double x0 = eq.rho * a;
+						double y0 = eq.rho * b;
+						int x1 = (int)(x0 + 1000 * (-b));
+						int y1 = (int)(y0 + 1000 * (a));
+						int x2 = (int)(x0 - 1000 * (-b));
+						int y2 = (int)(y0 - 1000 * (a));
+						tempImg.Draw(new LineSegment2D(new Point(x1, y1), new Point(x2, y2)), new Bgr(Color.Green), 2);
+					}
 				pictureBox1.Image = tempImg.ToBitmap();
 			}
-			
-			// sobel
-			/*
-			Image<Bgr, Byte> img = new Image<Bgr, byte>(displayAdapter1.Image.ConvertToBitmap());
-			Image<Gray, byte> gImg = img.Convert<Gray, byte>();
-			Image<Gray, float> sobel = gImg.Sobel(0, 1, 3).Add(gImg.Sobel(1, 0, 3)).AbsDiff(new Gray(0.0));
-			pictureBox1.Image = sobel.ToBitmap();
-			*/
-
-			//cvinvoke
-			/*
-			Image<Bgr, Byte> img = new Image<Bgr, byte>(displayAdapter1.Image.ConvertToBitmap());
-			UMat uimage = new UMat();
-			CvInvoke.CvtColor(img, uimage, Emgu.CV.CvEnum.ColorConversion.Bgr2Gray);
-			UMat pyrDown = new UMat();
-			CvInvoke.PyrDown(uimage, pyrDown);
-			CvInvoke.PyrUp(pyrDown, uimage);
-
-			UMat cannyEdges = new UMat();
-			CvInvoke.Canny(uimage, cannyEdges, minTrackBar.Value, maxTrackBar.Value);
-			Image<Bgr, byte> tempImage = cannyEdges.ToImage<Bgr, byte>();
-			pictureBox1.Image = tempImage.Bitmap;
-
-			if (houghCheckBox.Checked) {
-				LineSegment2D[] lines = CvInvoke.HoughLinesP(cannyEdges, 1, Math.PI / 180.0, houghThreshholdBar.Value, 0, 0);
-				foreach (LineSegment2D l in lines) {
-					tempImage.Draw(l, new Bgr(Color.Green), 2);
-				}
-				pictureBox1.Image = tempImage.Bitmap;
-			}
-			*/
-
-
 		}
 
 		private void minTrackBar_Scroll(object sender, EventArgs e) {
@@ -312,5 +316,16 @@ namespace IduleProvider {
 			thresholdLabel.Text = houghThreshholdBar.Value.ToString();
 		}
 
+	}
+	public struct polarEq {
+		public float rho;
+		public float theta;
+		public polarEq(float r, float t) {
+			rho = r;
+			theta = t;
+		}
+		public override string ToString() {
+			return string.Format("rho: {0}, theta: {1}", rho, theta);
+		}
 	}
 }

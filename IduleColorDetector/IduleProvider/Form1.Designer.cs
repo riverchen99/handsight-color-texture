@@ -46,6 +46,7 @@
 			this.houghCheckBox = new System.Windows.Forms.CheckBox();
 			this.houghThreshholdBar = new System.Windows.Forms.TrackBar();
 			this.thresholdLabel = new System.Windows.Forms.Label();
+			this.outputLabel = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.minTrackBar)).BeginInit();
@@ -87,7 +88,7 @@
 			this.trackBar1.Size = new System.Drawing.Size(139, 31);
 			this.trackBar1.TabIndex = 11;
 			this.trackBar1.TickStyle = System.Windows.Forms.TickStyle.None;
-			this.trackBar1.Value = 50;
+			this.trackBar1.Value = 5;
 			this.trackBar1.Scroll += new System.EventHandler(this.trackBar1_Scroll);
 			// 
 			// saveRawImgButton
@@ -195,7 +196,7 @@
 			this.maxTrackBar.Size = new System.Drawing.Size(139, 31);
 			this.maxTrackBar.TabIndex = 21;
 			this.maxTrackBar.TickStyle = System.Windows.Forms.TickStyle.None;
-			this.maxTrackBar.Value = 25;
+			this.maxTrackBar.Value = 125;
 			this.maxTrackBar.Scroll += new System.EventHandler(this.maxTrackBar_Scroll);
 			// 
 			// minLabel
@@ -214,15 +215,13 @@
 			this.maxLabel.Location = new System.Drawing.Point(176, 407);
 			this.maxLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.maxLabel.Name = "maxLabel";
-			this.maxLabel.Size = new System.Drawing.Size(24, 17);
+			this.maxLabel.Size = new System.Drawing.Size(32, 17);
 			this.maxLabel.TabIndex = 23;
-			this.maxLabel.Text = "25";
+			this.maxLabel.Text = "120";
 			// 
 			// houghCheckBox
 			// 
 			this.houghCheckBox.AutoSize = true;
-			this.houghCheckBox.Checked = true;
-			this.houghCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.houghCheckBox.Location = new System.Drawing.Point(20, 248);
 			this.houghCheckBox.Margin = new System.Windows.Forms.Padding(4);
 			this.houghCheckBox.Name = "houghCheckBox";
@@ -236,12 +235,12 @@
 			this.houghThreshholdBar.AutoSize = false;
 			this.houghThreshholdBar.Location = new System.Drawing.Point(23, 515);
 			this.houghThreshholdBar.Margin = new System.Windows.Forms.Padding(4);
-			this.houghThreshholdBar.Maximum = 100;
+			this.houghThreshholdBar.Maximum = 255;
 			this.houghThreshholdBar.Name = "houghThreshholdBar";
 			this.houghThreshholdBar.Size = new System.Drawing.Size(139, 31);
 			this.houghThreshholdBar.TabIndex = 25;
 			this.houghThreshholdBar.TickStyle = System.Windows.Forms.TickStyle.None;
-			this.houghThreshholdBar.Value = 10;
+			this.houghThreshholdBar.Value = 150;
 			this.houghThreshholdBar.Scroll += new System.EventHandler(this.houghThreshholdBar_Scroll);
 			// 
 			// thresholdLabel
@@ -250,15 +249,25 @@
 			this.thresholdLabel.Location = new System.Drawing.Point(176, 515);
 			this.thresholdLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.thresholdLabel.Name = "thresholdLabel";
-			this.thresholdLabel.Size = new System.Drawing.Size(24, 17);
+			this.thresholdLabel.Size = new System.Drawing.Size(32, 17);
 			this.thresholdLabel.TabIndex = 26;
-			this.thresholdLabel.Text = "10";
+			this.thresholdLabel.Text = "150";
+			// 
+			// outputLabel
+			// 
+			this.outputLabel.AutoSize = true;
+			this.outputLabel.Location = new System.Drawing.Point(58, 647);
+			this.outputLabel.Name = "outputLabel";
+			this.outputLabel.Size = new System.Drawing.Size(23, 17);
+			this.outputLabel.TabIndex = 27;
+			this.outputLabel.Text = "---";
 			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(1906, 834);
+			this.Controls.Add(this.outputLabel);
 			this.Controls.Add(this.thresholdLabel);
 			this.Controls.Add(this.houghThreshholdBar);
 			this.Controls.Add(this.houghCheckBox);
@@ -310,6 +319,7 @@
 		private System.Windows.Forms.CheckBox houghCheckBox;
 		private System.Windows.Forms.TrackBar houghThreshholdBar;
 		private System.Windows.Forms.Label thresholdLabel;
+		private System.Windows.Forms.Label outputLabel;
     }
 }
 
