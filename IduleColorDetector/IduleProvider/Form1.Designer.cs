@@ -47,6 +47,7 @@
 			this.houghThreshholdBar = new System.Windows.Forms.TrackBar();
 			this.thresholdLabel = new System.Windows.Forms.Label();
 			this.outputLabel = new System.Windows.Forms.Label();
+			this.outputLabel2 = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.minTrackBar)).BeginInit();
@@ -256,17 +257,27 @@
 			// outputLabel
 			// 
 			this.outputLabel.AutoSize = true;
-			this.outputLabel.Location = new System.Drawing.Point(58, 647);
+			this.outputLabel.Location = new System.Drawing.Point(58, 584);
 			this.outputLabel.Name = "outputLabel";
 			this.outputLabel.Size = new System.Drawing.Size(23, 17);
 			this.outputLabel.TabIndex = 27;
 			this.outputLabel.Text = "---";
+			// 
+			// outputLabel2
+			// 
+			this.outputLabel2.AutoSize = true;
+			this.outputLabel2.Location = new System.Drawing.Point(58, 769);
+			this.outputLabel2.Name = "outputLabel2";
+			this.outputLabel2.Size = new System.Drawing.Size(23, 17);
+			this.outputLabel2.TabIndex = 28;
+			this.outputLabel2.Text = "---";
 			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(1906, 834);
+			this.Controls.Add(this.outputLabel2);
 			this.Controls.Add(this.outputLabel);
 			this.Controls.Add(this.thresholdLabel);
 			this.Controls.Add(this.houghThreshholdBar);
@@ -320,6 +331,7 @@
 		private System.Windows.Forms.TrackBar houghThreshholdBar;
 		private System.Windows.Forms.Label thresholdLabel;
 		private System.Windows.Forms.Label outputLabel;
+		private System.Windows.Forms.Label outputLabel2;
     }
 }
 

@@ -26,7 +26,8 @@ using System.Runtime.InteropServices;
 using Emgu.CV;
 using Emgu.Util;
 using Emgu.CV.Structure;
-
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace IduleProvider {
 	public partial class Form1 : Form {
@@ -48,7 +49,7 @@ namespace IduleProvider {
 #if(IduleStereo_raw || IduleStereo_processed)
 		StereoIduleProviderCs provider = new StereoIduleProviderCs();
 #endif
-
+		string lockObj = "lockObj";
 		public Form1() {
 			InitializeComponent();
 
@@ -116,6 +117,11 @@ namespace IduleProvider {
             if(e.SensorID == 1)
                 displayAdapter2.DrawImage(ppm);
 			 */
+			if (Monitor.TryEnter(lockObj)) {
+				try {
+					Invoke(new MethodInvoker(delegate { checkCrossing(); }));
+				} catch { } finally { Monitor.Exit(lockObj); }
+			}
 		}
 
 		/// <summary>
@@ -243,38 +249,35 @@ namespace IduleProvider {
 			Image<Gray, byte> filteredImg = img.Convert<Gray, byte>().PyrDown().PyrUp();
 			Image<Gray, byte> cannyImg = filteredImg.Canny(minTrackBar.Value, maxTrackBar.Value);
 			pictureBox1.Image = cannyImg.ToBitmap();
-			
+
 			if (houghCheckBox.Checked) {
 				Image<Bgr, byte> tempImg = cannyImg.Convert<Bgr, byte>();
 				Emgu.CV.Util.VectorOfPointF points = new Emgu.CV.Util.VectorOfPointF();
 				CvInvoke.HoughLines(cannyImg, points, 1, Math.PI / 180.0, houghThreshholdBar.Value);
-
 				PointF[] pointArray = points.ToArray();
 				List<polarEq> polarEqList = new List<polarEq>();
 				foreach (PointF p in pointArray) {
-					if (p.Y != 0) { // remove vertical lines (side)
+					if (!(p.X == 7 && p.Y == 0) && !(p.X == 637 && p.Y == 0)) { // remove vertical lines (side)
 						polarEqList.Add(new polarEq(p.X, p.Y));
 					}
 				}
 				polarEqList = polarEqList.OrderBy(list => list.theta).ToList();
 
-				List<int> splitIndices = new List<int>() { -1 };
+
+				List<int> splitIndices = new List<int>() { -1 }; // where to split
 				for (int i = 0; i < polarEqList.Count - 1; i++) {
 					if ((polarEqList[i + 1].theta - polarEqList[i].theta) > .1) {
 						splitIndices.Add(i);
 					}
 				}
+				splitIndices.Add(polarEqList.Count - 1);
 
 
-				List<List<polarEq>> eqGroups = new List<List<polarEq>>();
+				List<List<polarEq>> eqGroups = new List<List<polarEq>>(); // split into groups
 				for (int i = 0; i < splitIndices.Count - 1; i++) {
-					eqGroups.Add(polarEqList.Skip(splitIndices[i] + 1).Take(splitIndices[i + 1] - splitIndices[i]).ToList<polarEq>());
+					eqGroups.Add(polarEqList.Take(splitIndices[i+1]+1).Skip(splitIndices[i]+1).ToList<polarEq>());
 				}
-				if (polarEqList[polarEqList.Count - 1].theta - polarEqList[0].theta < (2 * Math.PI - 1)) { // doesn't loop around
-					eqGroups.Add(polarEqList.Skip(splitIndices[splitIndices.Count - 1] + 1).Take(polarEqList.Count - splitIndices[splitIndices.Count - 1]).ToList<polarEq>());
-				} else { // test this
-					eqGroups[0] = eqGroups[0].Concat(polarEqList.Skip(splitIndices[splitIndices.Count - 1] + 1).Take(polarEqList.Count - splitIndices[splitIndices.Count - 1]).ToList<polarEq>()).ToList<polarEq>();
-				}
+
 				outputLabel.Text = "";
 				foreach (List<polarEq> group in eqGroups) {
 					foreach (polarEq eq in group) {
@@ -283,20 +286,21 @@ namespace IduleProvider {
 					outputLabel.Text += "\n";
 				}
 
+				if (polarEqList.Count == 0) {
+					outputLabel2.Text = "No pattern.";
+				} else if (eqGroups.Count == 1) {
+					outputLabel2.Text = "Stripes.";
+				} else if (eqGroups.Count == 2 && (Math.Abs(Math.Abs(eqGroups.First().First().theta - eqGroups.Last().First().theta) > Math.PI ? Math.Abs(eqGroups.First().First().theta - eqGroups.Last().First().theta) - Math.PI : Math.Abs(eqGroups.First().First().theta - eqGroups.Last().First().theta)) - Math.PI/2) < .1) {
+					outputLabel2.Text = "Checkers";
+				} else {
+					outputLabel2.Text = "unknown pattern";
+				}
 
-					foreach (polarEq eq in polarEqList) {
-						// rho, theta
-						// drawing
-						double a = Math.Cos(eq.theta);
-						double b = Math.Sin(eq.theta);
-						double x0 = eq.rho * a;
-						double y0 = eq.rho * b;
-						int x1 = (int)(x0 + 1000 * (-b));
-						int y1 = (int)(y0 + 1000 * (a));
-						int x2 = (int)(x0 - 1000 * (-b));
-						int y2 = (int)(y0 - 1000 * (a));
-						tempImg.Draw(new LineSegment2D(new Point(x1, y1), new Point(x2, y2)), new Bgr(Color.Green), 2);
-					}
+				foreach (polarEq eq in polarEqList) { // drawing
+					tempImg.Draw(new LineSegment2D(new Point(eq.x1, eq.y1), new Point(eq.x2, eq.y2)), new Bgr(Color.Green), 2);
+				}
+
+				tempImg.Draw();
 				pictureBox1.Image = tempImg.ToBitmap();
 			}
 		}
@@ -316,13 +320,44 @@ namespace IduleProvider {
 			thresholdLabel.Text = houghThreshholdBar.Value.ToString();
 		}
 
+		bool crossing;
+		private void checkCrossing() {
+			bool temp = crossing;
+			CannyButton_Click(null, null);
+			Bitmap snap = new Bitmap(pictureBox1.Image);
+			crossing = false;
+			for (int i = 310; i <= 330; i++) {
+				for (int j = 0; j <= 330; j++) {
+					if (snap.GetPixel(i, j) == Color.Green) {
+						crossing = true;
+					}
+				}
+			}
+			if (temp != crossing) {
+				if (crossing) {
+					Console.Beep(1000, 100000);
+				} else {
+					Console.Beep(1000, 1);
+				}
+			}
+		}
 	}
+
 	public struct polarEq {
-		public float rho;
-		public float theta;
+		public float rho, theta;
+		public double a, b, x0, y0;
+		public int x1, y1, x2, y2;
 		public polarEq(float r, float t) {
 			rho = r;
 			theta = t;
+			a = Math.Cos(theta);
+			b = Math.Sin(theta);
+			x0 = rho * a;
+			y0 = rho * b;
+			x1 = (int)(x0 + 1000 * (-b));
+			y1 = (int)(y0 + 1000 * (a));
+			x2 = (int)(x0 - 1000 * (-b));
+			y2 = (int)(y0 - 1000 * (a));
 		}
 		public override string ToString() {
 			return string.Format("rho: {0}, theta: {1}", rho, theta);
