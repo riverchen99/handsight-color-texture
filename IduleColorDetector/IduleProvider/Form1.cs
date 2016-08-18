@@ -297,10 +297,13 @@ namespace IduleProvider {
 				}
 
 				foreach (polarEq eq in polarEqList) { // drawing
-					tempImg.Draw(new LineSegment2D(new Point(eq.x1, eq.y1), new Point(eq.x2, eq.y2)), new Bgr(Color.Green), 2);
+					tempImg.Draw(new LineSegment2D(new Point(eq.x1, eq.y1), new Point(eq.x2, eq.y2)), new Bgr(0, 255, 0), 2);
 				}
 
-				tempImg.Draw();
+				tempImg.Draw(new LineSegment2D(new Point(310, 310), new Point(310, 330)), new Bgr(Color.Red), 2);
+				tempImg.Draw(new LineSegment2D(new Point(310, 310), new Point(330, 310)), new Bgr(Color.Red), 2);
+				tempImg.Draw(new LineSegment2D(new Point(310, 330), new Point(330, 330)), new Bgr(Color.Red), 2);
+				tempImg.Draw(new LineSegment2D(new Point(330, 310), new Point(330, 330)), new Bgr(Color.Red), 2);
 				pictureBox1.Image = tempImg.ToBitmap();
 			}
 		}
@@ -327,17 +330,19 @@ namespace IduleProvider {
 			Bitmap snap = new Bitmap(pictureBox1.Image);
 			crossing = false;
 			for (int i = 310; i <= 330; i++) {
-				for (int j = 0; j <= 330; j++) {
-					if (snap.GetPixel(i, j) == Color.Green) {
+				for (int j = 310; j <= 330; j++) {
+					if (snap.GetPixel(i, j).G == 255) {
 						crossing = true;
 					}
 				}
 			}
 			if (temp != crossing) {
 				if (crossing) {
-					Console.Beep(1000, 100000);
+					//Console.Beep(1000, 100000);
+					label2.Text = "crossing!!!";
 				} else {
-					Console.Beep(1000, 1);
+					//Console.Beep(1000, 1);
+					label2.Text = "not crossing!!!";
 				}
 			}
 		}

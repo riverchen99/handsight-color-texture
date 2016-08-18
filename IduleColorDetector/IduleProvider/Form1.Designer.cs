@@ -48,6 +48,7 @@
 			this.thresholdLabel = new System.Windows.Forms.Label();
 			this.outputLabel = new System.Windows.Forms.Label();
 			this.outputLabel2 = new System.Windows.Forms.Label();
+			this.label2 = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.minTrackBar)).BeginInit();
@@ -272,11 +273,21 @@
 			this.outputLabel2.TabIndex = 28;
 			this.outputLabel2.Text = "---";
 			// 
+			// label2
+			// 
+			this.label2.AutoSize = true;
+			this.label2.Location = new System.Drawing.Point(58, 808);
+			this.label2.Name = "label2";
+			this.label2.Size = new System.Drawing.Size(23, 17);
+			this.label2.TabIndex = 29;
+			this.label2.Text = "---";
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(1906, 834);
+			this.Controls.Add(this.label2);
 			this.Controls.Add(this.outputLabel2);
 			this.Controls.Add(this.outputLabel);
 			this.Controls.Add(this.thresholdLabel);
@@ -332,6 +343,7 @@
 		private System.Windows.Forms.Label thresholdLabel;
 		private System.Windows.Forms.Label outputLabel;
 		private System.Windows.Forms.Label outputLabel2;
+		private System.Windows.Forms.Label label2;
     }
 }
 
