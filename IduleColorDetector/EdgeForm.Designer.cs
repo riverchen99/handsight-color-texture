@@ -1,6 +1,6 @@
 ﻿namespace IduleProvider
 {
-    partial class Form1
+    partial class EdgeForm
     {
         /// <summary>
         /// Required designer variable.
@@ -37,7 +37,7 @@
 			this.button5 = new System.Windows.Forms.Button();
 			this.button4 = new System.Windows.Forms.Button();
 			this.displayAdapter1 = new Awaiba.Controls.DisplayAdapter();
-			this.CannyButton = new System.Windows.Forms.Button();
+			this.edgeDetectButton = new System.Windows.Forms.Button();
 			this.pictureBox1 = new System.Windows.Forms.PictureBox();
 			this.minTrackBar = new System.Windows.Forms.TrackBar();
 			this.maxTrackBar = new System.Windows.Forms.TrackBar();
@@ -48,7 +48,7 @@
 			this.thresholdLabel = new System.Windows.Forms.Label();
 			this.outputLabel = new System.Windows.Forms.Label();
 			this.outputLabel2 = new System.Windows.Forms.Label();
-			this.label2 = new System.Windows.Forms.Label();
+			this.outputLabel3 = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.minTrackBar)).BeginInit();
@@ -156,16 +156,16 @@
 			this.displayAdapter1.Size = new System.Drawing.Size(853, 788);
 			this.displayAdapter1.TabIndex = 18;
 			// 
-			// CannyButton
+			// edgeDetectButton
 			// 
-			this.CannyButton.Location = new System.Drawing.Point(13, 289);
-			this.CannyButton.Margin = new System.Windows.Forms.Padding(4);
-			this.CannyButton.Name = "CannyButton";
-			this.CannyButton.Size = new System.Drawing.Size(100, 28);
-			this.CannyButton.TabIndex = 19;
-			this.CannyButton.Text = "Canny";
-			this.CannyButton.UseVisualStyleBackColor = true;
-			this.CannyButton.Click += new System.EventHandler(this.CannyButton_Click);
+			this.edgeDetectButton.Location = new System.Drawing.Point(13, 289);
+			this.edgeDetectButton.Margin = new System.Windows.Forms.Padding(4);
+			this.edgeDetectButton.Name = "edgeDetectButton";
+			this.edgeDetectButton.Size = new System.Drawing.Size(100, 28);
+			this.edgeDetectButton.TabIndex = 19;
+			this.edgeDetectButton.Text = "Canny";
+			this.edgeDetectButton.UseVisualStyleBackColor = true;
+			this.edgeDetectButton.Click += new System.EventHandler(this.edgeDetectButton_Click);
 			// 
 			// pictureBox1
 			// 
@@ -235,7 +235,7 @@
 			// houghThreshholdBar
 			// 
 			this.houghThreshholdBar.AutoSize = false;
-			this.houghThreshholdBar.Location = new System.Drawing.Point(23, 515);
+			this.houghThreshholdBar.Location = new System.Drawing.Point(23, 490);
 			this.houghThreshholdBar.Margin = new System.Windows.Forms.Padding(4);
 			this.houghThreshholdBar.Maximum = 255;
 			this.houghThreshholdBar.Name = "houghThreshholdBar";
@@ -248,7 +248,7 @@
 			// thresholdLabel
 			// 
 			this.thresholdLabel.AutoSize = true;
-			this.thresholdLabel.Location = new System.Drawing.Point(176, 515);
+			this.thresholdLabel.Location = new System.Drawing.Point(176, 490);
 			this.thresholdLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
 			this.thresholdLabel.Name = "thresholdLabel";
 			this.thresholdLabel.Size = new System.Drawing.Size(32, 17);
@@ -258,7 +258,7 @@
 			// outputLabel
 			// 
 			this.outputLabel.AutoSize = true;
-			this.outputLabel.Location = new System.Drawing.Point(58, 584);
+			this.outputLabel.Location = new System.Drawing.Point(20, 625);
 			this.outputLabel.Name = "outputLabel";
 			this.outputLabel.Size = new System.Drawing.Size(23, 17);
 			this.outputLabel.TabIndex = 27;
@@ -267,27 +267,27 @@
 			// outputLabel2
 			// 
 			this.outputLabel2.AutoSize = true;
-			this.outputLabel2.Location = new System.Drawing.Point(58, 769);
+			this.outputLabel2.Location = new System.Drawing.Point(20, 572);
 			this.outputLabel2.Name = "outputLabel2";
 			this.outputLabel2.Size = new System.Drawing.Size(23, 17);
 			this.outputLabel2.TabIndex = 28;
 			this.outputLabel2.Text = "---";
 			// 
-			// label2
+			// outputLabel3
 			// 
-			this.label2.AutoSize = true;
-			this.label2.Location = new System.Drawing.Point(58, 808);
-			this.label2.Name = "label2";
-			this.label2.Size = new System.Drawing.Size(23, 17);
-			this.label2.TabIndex = 29;
-			this.label2.Text = "---";
+			this.outputLabel3.AutoSize = true;
+			this.outputLabel3.Location = new System.Drawing.Point(93, 572);
+			this.outputLabel3.Name = "outputLabel3";
+			this.outputLabel3.Size = new System.Drawing.Size(23, 17);
+			this.outputLabel3.TabIndex = 29;
+			this.outputLabel3.Text = "---";
 			// 
-			// Form1
+			// EdgeForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(1906, 834);
-			this.Controls.Add(this.label2);
+			this.Controls.Add(this.outputLabel3);
 			this.Controls.Add(this.outputLabel2);
 			this.Controls.Add(this.outputLabel);
 			this.Controls.Add(this.thresholdLabel);
@@ -298,7 +298,7 @@
 			this.Controls.Add(this.maxTrackBar);
 			this.Controls.Add(this.minTrackBar);
 			this.Controls.Add(this.pictureBox1);
-			this.Controls.Add(this.CannyButton);
+			this.Controls.Add(this.edgeDetectButton);
 			this.Controls.Add(this.displayAdapter1);
 			this.Controls.Add(this.button5);
 			this.Controls.Add(this.button4);
@@ -309,8 +309,8 @@
 			this.Controls.Add(this.StopButton);
 			this.Controls.Add(this.StartButton);
 			this.Margin = new System.Windows.Forms.Padding(4);
-			this.Name = "Form1";
-			this.Text = "Form1";
+			this.Name = "EdgeForm";
+			this.Text = "EdgeForm";
 			((System.ComponentModel.ISupportInitialize)(this.trackBar1)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.minTrackBar)).EndInit();
@@ -332,7 +332,7 @@
         private System.Windows.Forms.Button button5;
         private System.Windows.Forms.Button button4;
 		private Awaiba.Controls.DisplayAdapter displayAdapter1;
-		private System.Windows.Forms.Button CannyButton;
+		private System.Windows.Forms.Button edgeDetectButton;
 		private System.Windows.Forms.PictureBox pictureBox1;
 		private System.Windows.Forms.TrackBar minTrackBar;
 		private System.Windows.Forms.TrackBar maxTrackBar;
@@ -343,7 +343,7 @@
 		private System.Windows.Forms.Label thresholdLabel;
 		private System.Windows.Forms.Label outputLabel;
 		private System.Windows.Forms.Label outputLabel2;
-		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.Label outputLabel3;
     }
 }
 

@@ -28,9 +28,51 @@ using Emgu.Util;
 using Emgu.CV.Structure;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Text.RegularExpressions;
 
-namespace IduleProvider {
-	public partial class Form1 : Form {
+namespace IduleCamProvider {
+	public partial class ColorForm : Form {
+		private KnownColor[] toRemove = {KnownColor.ActiveBorder, // system colors
+										KnownColor.ActiveCaption,
+										KnownColor.ActiveCaptionText,
+										KnownColor.AppWorkspace,
+										KnownColor.ButtonFace,
+										KnownColor.ButtonHighlight,
+										KnownColor.ButtonShadow,
+										KnownColor.Control, 
+										KnownColor.ControlDark,
+										KnownColor.ControlDarkDark, 
+										KnownColor.ControlLight,
+										KnownColor.ControlLightLight, 
+										KnownColor.ControlText,
+										KnownColor.Desktop, 
+										KnownColor.GradientActiveCaption,
+										KnownColor.GradientInactiveCaption,
+										KnownColor.GrayText,
+										KnownColor.Highlight, 
+										KnownColor.HighlightText, 
+										KnownColor.HotTrack,
+										KnownColor.InactiveBorder, 
+										KnownColor.InactiveCaption, 
+										KnownColor.InactiveCaptionText, 
+										KnownColor.Info,
+										KnownColor.InfoText,
+										KnownColor.Menu,
+										KnownColor.MenuBar, 
+										KnownColor.MenuHighlight, 
+										KnownColor.MenuText, 
+										KnownColor.ScrollBar, 
+										KnownColor.Window, 
+										KnownColor.WindowFrame, 
+										KnownColor.WindowText};
+		private List<KnownColor> knownColors = new List<KnownColor>((KnownColor[])Enum.GetValues(typeof(KnownColor)));
+		static int bins = 72;
+		List<int> hueHistData = new List<int>(new int[bins]), satHistData = new List<int>(new int[bins]), lumHistData = new List<int>(new int[bins]);
+		List<Color> colors = new List<Color>();
+		List<Tuple<List<int>, List<int>, List<int>, String>> savedMaterials = new List<Tuple<List<int>, List<int>, List<int>, string>>();
+		int totalR = 0, totalG = 0, totalB = 0;
+		float totalH = 0, totalS = 0, totalL = 0;
+		int pxCount;// = 62500;
 		/// <summary>
 		/// Camera Initialization
 		/// IduleProviderCsCam(0) -> initialize first camera that is connected
@@ -50,7 +92,7 @@ namespace IduleProvider {
 		StereoIduleProviderCs provider = new StereoIduleProviderCs();
 #endif
 		string lockObj = "lockObj";
-		public Form1() {
+		public ColorForm() {
 			InitializeComponent();
 
 			//Note: To receive the 90 fps that the sensor sends, only the "ImageTransaction" hook needs to be done;
@@ -96,6 +138,11 @@ namespace IduleProvider {
 
 			ProcessingWrapper.pr[0].colorReconstruction.SetBayerGrid(1);
 			 */
+
+			foreach (KnownColor c in toRemove) {
+				knownColors.Remove(c);
+			}
+
 		}
 
 		private void provider_Exception(object sender, OnExceptionEventArgs e) {
@@ -119,7 +166,7 @@ namespace IduleProvider {
 			 */
 			if (Monitor.TryEnter(lockObj)) {
 				try {
-					Invoke(new MethodInvoker(delegate { checkCrossing(); }));
+					//Invoke(new MethodInvoker(delegate { checkCrossing(); }));
 				} catch { } finally { Monitor.Exit(lockObj); }
 			}
 		}
@@ -243,129 +290,172 @@ namespace IduleProvider {
 			}
 		}
 
-		private void CannyButton_Click(object sender, EventArgs e) {
-			// gaussian blur
-			Image<Bgr, Byte> img = new Image<Bgr, byte>(displayAdapter1.Image.ConvertToBitmap());
-			Image<Gray, byte> filteredImg = img.Convert<Gray, byte>().PyrDown().PyrUp();
-			Image<Gray, byte> cannyImg = filteredImg.Canny(minTrackBar.Value, maxTrackBar.Value);
-			pictureBox1.Image = cannyImg.ToBitmap();
+		private void GetPixels() {
+			hueHistData = new List<int>(new int[bins]);
+			satHistData = new List<int>(new int[bins]);
+			lumHistData = new List<int>(new int[bins]);
+			colors = new List<Color>();
+			totalR = totalG = totalB = 0;
+			totalH = totalS = totalL = 0;
+			pxCount = 0;
 
-			if (houghCheckBox.Checked) {
-				Image<Bgr, byte> tempImg = cannyImg.Convert<Bgr, byte>();
-				Emgu.CV.Util.VectorOfPointF points = new Emgu.CV.Util.VectorOfPointF();
-				CvInvoke.HoughLines(cannyImg, points, 1, Math.PI / 180.0, houghThreshholdBar.Value);
-				PointF[] pointArray = points.ToArray();
-				List<polarEq> polarEqList = new List<polarEq>();
-				foreach (PointF p in pointArray) {
-					if (!(p.X == 7 && p.Y == 0) && !(p.X == 637 && p.Y == 0)) { // remove vertical lines (side)
-						polarEqList.Add(new polarEq(p.X, p.Y));
+			Image<Bgr, byte> img = new Image<Bgr, byte>(displayAdapter1.Image.ConvertToBitmap());
+			img = img.PyrDown().PyrDown();
+			//pictureBox1.Image = img.PyrUp().PyrUp().ToBitmap();
+
+			Bitmap snap = img.ToBitmap();
+			for (int i = 0; i < snap.Width; i++) {
+				for (int j = 0; j < snap.Height; j++) {
+					Color c = snap.GetPixel(i, j);
+					colors.Add(c);
+					hueHistData[(int)(c.GetHue() * (bins / 360.0))]++;
+					satHistData[(int)((c.GetSaturation() - .00001) * bins)]++; // prevent c.GetSaturation() = 1
+					lumHistData[(int)((c.GetBrightness() - .00001) * bins)]++;
+					if (i > 100 && i < 150 && j > 100 && j < 150) {
+						totalR += c.R;
+						totalG += c.G;
+						totalB += c.B;
+						totalH += c.GetHue();
+						totalS += c.GetSaturation();
+						totalL += c.GetBrightness();
+						pxCount++;
 					}
 				}
-				polarEqList = polarEqList.OrderBy(list => list.theta).ToList();
-
-
-				List<int> splitIndices = new List<int>() { -1 }; // where to split
-				for (int i = 0; i < polarEqList.Count - 1; i++) {
-					if ((polarEqList[i + 1].theta - polarEqList[i].theta) > .1) {
-						splitIndices.Add(i);
-					}
-				}
-				splitIndices.Add(polarEqList.Count - 1);
-
-
-				List<List<polarEq>> eqGroups = new List<List<polarEq>>(); // split into groups
-				for (int i = 0; i < splitIndices.Count - 1; i++) {
-					eqGroups.Add(polarEqList.Take(splitIndices[i+1]+1).Skip(splitIndices[i]+1).ToList<polarEq>());
-				}
-
-				outputLabel.Text = "";
-				foreach (List<polarEq> group in eqGroups) {
-					foreach (polarEq eq in group) {
-						outputLabel.Text += eq + "\n";
-					}
-					outputLabel.Text += "\n";
-				}
-
-				if (polarEqList.Count == 0) {
-					outputLabel2.Text = "No pattern.";
-				} else if (eqGroups.Count == 1) {
-					outputLabel2.Text = "Stripes.";
-				} else if (eqGroups.Count == 2 && (Math.Abs(Math.Abs(eqGroups.First().First().theta - eqGroups.Last().First().theta) > Math.PI ? Math.Abs(eqGroups.First().First().theta - eqGroups.Last().First().theta) - Math.PI : Math.Abs(eqGroups.First().First().theta - eqGroups.Last().First().theta)) - Math.PI/2) < .1) {
-					outputLabel2.Text = "Checkers";
-				} else {
-					outputLabel2.Text = "unknown pattern";
-				}
-
-				foreach (polarEq eq in polarEqList) { // drawing
-					tempImg.Draw(new LineSegment2D(new Point(eq.x1, eq.y1), new Point(eq.x2, eq.y2)), new Bgr(0, 255, 0), 2);
-				}
-
-				tempImg.Draw(new LineSegment2D(new Point(310, 310), new Point(310, 330)), new Bgr(Color.Red), 2);
-				tempImg.Draw(new LineSegment2D(new Point(310, 310), new Point(330, 310)), new Bgr(Color.Red), 2);
-				tempImg.Draw(new LineSegment2D(new Point(310, 330), new Point(330, 330)), new Bgr(Color.Red), 2);
-				tempImg.Draw(new LineSegment2D(new Point(330, 310), new Point(330, 330)), new Bgr(Color.Red), 2);
-				pictureBox1.Image = tempImg.ToBitmap();
 			}
 		}
 
-		private void minTrackBar_Scroll(object sender, EventArgs e) {
-			CannyButton_Click(null, null);
-			minLabel.Text = minTrackBar.Value.ToString();
+		private void GenerateHist(List<int> histData) {
+			Bitmap histImg = new Bitmap(625, 360);
+			histBox.Image = histImg;
+			Graphics g1 = Graphics.FromImage(histImg);
+
+			for (int bin = 0; bin < histData.Count; bin++) {
+				g1.FillRectangle(new SolidBrush(ColorFromHSL(1.0 * bin / bins, 1.0, .5)), new Rectangle(0, bin * (360 / bins), histData[bin] / 100, 360 / bins));
+			}
+
+			//smoothing
+			List<int> smoothedHistData = new List<int>(histData);
+			smoothedHistData[0] = (histData.Last() + histData[0] + histData[1]) / 3;
+			smoothedHistData[smoothedHistData.Count - 1] = (histData[histData.Count - 2] + histData.Last() + histData[0]) / 3;
+			for (int bin = 1; bin < histData.Count - 1; bin++) {
+				smoothedHistData[bin] = (histData[bin - 1] + histData[bin] + histData[bin + 1]) / 3;
+			}
+
+			//generate smoothed histogram
+			Bitmap histSmoothedImg = new Bitmap(625, 360);
+			smoothedHistBox.Image = histSmoothedImg;
+			Graphics g2 = Graphics.FromImage(histSmoothedImg);
+
+			for (int bin = 0; bin < smoothedHistData.Count; bin++) {
+				g2.FillRectangle(new SolidBrush(ColorFromHSL(1.0 * bin / bins, 1.0, .5)), new Rectangle(0, bin * (360 / bins), smoothedHistData[bin] / 100, 360 / bins));
+			}
 		}
 
-		private void maxTrackBar_Scroll(object sender, EventArgs e) {
-			CannyButton_Click(null, null);
-			maxLabel.Text = maxTrackBar.Value.ToString();
+		private double RGBColorDistance(Color c1, Color c2) {
+			return Math.Pow(Math.Pow((double)(c1.R - c2.R), 2.0) + Math.Pow((double)(c1.G - c2.G), 2.0) + Math.Pow((double)(c1.B - c2.B), 2.0), .5);
 		}
 
-		private void houghThreshholdBar_Scroll(object sender, EventArgs e) {
-			CannyButton_Click(null, null);
-			thresholdLabel.Text = houghThreshholdBar.Value.ToString();
+		// from http://james-ramsden.com/convert-from-hsl-to-rgb-colour-codes-in-c/
+		public static Color ColorFromHSL(double h, double s, double l) {
+			double r = 0, g = 0, b = 0;
+			if (l != 0) {
+				if (s == 0)
+					r = g = b = l;
+				else {
+					double temp2;
+					if (l < 0.5)
+						temp2 = l * (1.0 + s);
+					else
+						temp2 = l + s - (l * s);
+
+					double temp1 = 2.0 * l - temp2;
+
+					r = GetColorComponent(temp1, temp2, h + 1.0 / 3.0);
+					g = GetColorComponent(temp1, temp2, h);
+					b = GetColorComponent(temp1, temp2, h - 1.0 / 3.0);
+				}
+			}
+			return Color.FromArgb((int)(255 * r), (int)(255 * g), (int)(255 * b));
 		}
 
-		bool crossing;
-		private void checkCrossing() {
-			bool temp = crossing;
-			CannyButton_Click(null, null);
+		private static double GetColorComponent(double temp1, double temp2, double temp3) {
+			if (temp3 < 0.0)
+				temp3 += 1.0;
+			else if (temp3 > 1.0)
+				temp3 -= 1.0;
+
+			if (temp3 < 1.0 / 6.0)
+				return temp1 + (temp2 - temp1) * 6.0 * temp3;
+			else if (temp3 < 0.5)
+				return temp2;
+			else if (temp3 < 2.0 / 3.0)
+				return temp1 + ((temp2 - temp1) * ((2.0 / 3.0) - temp3) * 6.0);
+			else
+				return temp1;
+		}
+
+		private void saveButton_Click(object sender, EventArgs e) {
+			GetPixels();
+			savedMaterials.Add(new Tuple<List<int>, List<int>, List<int>, String>(new List<int>(hueHistData), new List<int>(satHistData), new List<int>(lumHistData), colorNameBox.Text));
+			colorNameBox.Text = "";
+		}
+
+		private void guessButton_Click(object sender, EventArgs e) {
+			GetPixels();
+			int minDif = Int32.MaxValue;
+			string closestName = "";
+			foreach (Tuple<List<int>, List<int>, List<int>, String> material in savedMaterials) {
+				int s = 0;
+				for (int bin = 0; bin < bins; bin++) {
+					s += Math.Abs(material.Item1[bin] - hueHistData[bin]);
+					s += Math.Abs(material.Item2[bin] - satHistData[bin]);
+					s += Math.Abs(material.Item3[bin] - lumHistData[bin]);
+				}
+				if (s < minDif) {
+					minDif = s;
+					closestName = material.Item4;
+				}
+			}
+			similarityLabel.Text = closestName;
+		}
+
+		private void AverageColorButton_Click(object sender, EventArgs e) {
+			GetPixels();
+			// display average rgb color and closest knowncolor match
+			Color avgRGBColor = Color.FromArgb(totalR / pxCount, totalG / pxCount, totalB / pxCount);
+			Color closestColor = new Color();
+			foreach (KnownColor c in knownColors) {
+				closestColor = RGBColorDistance(avgRGBColor, Color.FromKnownColor(c)) < RGBColorDistance(avgRGBColor, closestColor) ? Color.FromKnownColor(c) : closestColor;
+			}
+			ColorLabel.Text = Regex.Replace(closestColor.Name, "(\\B[A-Z])", " $1");
+			//TTS(Regex.Replace(closestColor.Name, "(\\B[A-Z])", " $1"));
+			actualColorBox.BackColor = avgRGBColor;
+			closestColorBox.BackColor = closestColor;
+
+			//Image<Bgr, Byte> img = new Image<Bgr, Byte>(new Bitmap(pictureBox1.Image)); // what is going on
+
+			/*
 			Bitmap snap = new Bitmap(pictureBox1.Image);
-			crossing = false;
-			for (int i = 310; i <= 330; i++) {
-				for (int j = 310; j <= 330; j++) {
-					if (snap.GetPixel(i, j).G == 255) {
-						crossing = true;
-					}
-				}
-			}
-			if (temp != crossing) {
-				if (crossing) {
-					//Console.Beep(1000, 100000);
-					label2.Text = "crossing!!!";
-				} else {
-					//Console.Beep(1000, 1);
-					label2.Text = "not crossing!!!";
-				}
-			}
+			var colorThief = new ColorThief.ColorThief();
+			var x = colorThief.GetColor(snap).Color;
+			closestColorBox.BackColor = System.Drawing.Color.FromArgb(x.R, x.G, x.B);
+			 */
 		}
-	}
 
-	public struct polarEq {
-		public float rho, theta;
-		public double a, b, x0, y0;
-		public int x1, y1, x2, y2;
-		public polarEq(float r, float t) {
-			rho = r;
-			theta = t;
-			a = Math.Cos(theta);
-			b = Math.Sin(theta);
-			x0 = rho * a;
-			y0 = rho * b;
-			x1 = (int)(x0 + 1000 * (-b));
-			y1 = (int)(y0 + 1000 * (a));
-			x2 = (int)(x0 - 1000 * (-b));
-			y2 = (int)(y0 - 1000 * (a));
+		private void HueHistButton_Click(object sender, EventArgs e) {
+			GetPixels();
+			GenerateHist(hueHistData);
 		}
-		public override string ToString() {
-			return string.Format("rho: {0}, theta: {1}", rho, theta);
+
+		private void SatHistButton_Click(object sender, EventArgs e) {
+			GetPixels();
+			GenerateHist(satHistData);
 		}
+
+		private void LumHistButton_Click(object sender, EventArgs e) {
+			GetPixels();
+			GenerateHist(lumHistData);
+		}
+
 	}
 }

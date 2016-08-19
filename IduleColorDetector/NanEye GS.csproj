@@ -40,7 +40,7 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>IduleProvider\bin\x86\Release\</OutputPath>
+    <OutputPath>bin\x86\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
@@ -86,42 +86,53 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IduleProvider\Form1.cs">
+    <Compile Include="EdgeForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="IduleProvider\Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="EdgeForm.Designer.cs">
+      <DependentUpon>EdgeForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="IduleProvider\Program.cs" />
-    <Compile Include="IduleProvider\Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="IduleProvider\Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="ColorForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ColorForm.Designer.cs">
+      <DependentUpon>ColorForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="EdgeForm.resx">
+      <DependentUpon>EdgeForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="IduleProvider\Properties\Resources.resx">
+    <EmbeddedResource Include="ColorForm.resx">
+      <DependentUpon>ColorForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <Compile Include="IduleProvider\Properties\Resources.Designer.cs">
+    <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <None Include="IduleProvider\Properties\Settings.settings">
+    <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <Compile Include="IduleProvider\Properties\Settings.Designer.cs">
+    <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="IduleProvider\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy /d /y "$(ProjectDir)dependencies\$(Platform)\opencv_imgproc249.dll" "$(ProjectDir)IduleProvider\bin\$(Platform)\Release"
-xcopy /d /y "$(ProjectDir)dependencies\$(Platform)\opencv_core249.dll" "$(ProjectDir)IduleProvider\bin\$(Platform)\Release"
-xcopy /d /y "$(ProjectDir)dependencies\$(Platform)\IduleProvider.dll" "$(ProjectDir)IduleProvider\bin\$(Platform)\Release"</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
