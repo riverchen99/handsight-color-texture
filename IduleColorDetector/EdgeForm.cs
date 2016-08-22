@@ -5,11 +5,11 @@
 
 
 //#define IduleCam0_raw
-//#define IduleCam0_processed
+#define IduleCam0_processed
 //#define IduleCam1_raw
 //#define IduleCam1_processed
 //#define IduleStereo_raw
-#define IduleStereo_processed
+//#define IduleStereo_processed
 
 using System;
 using System.Collections.Generic;
@@ -50,6 +50,7 @@ namespace IduleProvider {
 		StereoIduleProviderCs provider = new StereoIduleProviderCs();
 #endif
 		string lockObj = "lockObj";
+
 		public EdgeForm() {
 			InitializeComponent();
 
@@ -96,6 +97,7 @@ namespace IduleProvider {
 
 			ProcessingWrapper.pr[0].colorReconstruction.SetBayerGrid(1);
 			 */
+
 		}
 
 		private void provider_Exception(object sender, OnExceptionEventArgs e) {
@@ -116,10 +118,12 @@ namespace IduleProvider {
 			/*
             if(e.SensorID == 1)
                 displayAdapter2.DrawImage(ppm);
-			 */
+			*/
+			
+			// check if line within rectangle
 			if (Monitor.TryEnter(lockObj)) {
 				try {
-					//Invoke(new MethodInvoker(delegate { checkCrossing(); }));
+					Invoke(new MethodInvoker(delegate { checkCrossing(); }));
 				} catch { } finally { Monitor.Exit(lockObj); }
 			}
 		}
@@ -142,7 +146,7 @@ namespace IduleProvider {
 				/*
                 if (e.SensorID == 1)
                     displayAdapter2.DrawImage(ppm);
-				 */
+				*/
 			}
 		}
 
@@ -243,26 +247,6 @@ namespace IduleProvider {
 			}
 		}
 
-		private void edgeDetectButton_Click(object sender, EventArgs e) {
-			Image<Bgr, byte> img = new Image<Bgr, byte>(displayAdapter1.Image.ConvertToBitmap());
-			Image<Gray, byte> filteredImg = img.Convert<Gray, byte>().PyrDown().PyrUp(); // also should add gaussian blur
-			Image<Hsv, byte> hsvImg = img.Convert<Hsv, byte>().PyrDown().PyrUp().SmoothGaussian(5);
-			Image<Gray, byte>[] hsvChannels = hsvImg.Split();
-
-			//Image<Gray, byte> cannyImg = filteredImg.Canny(minTrackBar.Value, maxTrackBar.Value);
-			Image<Gray, byte> cannyImg = hsvChannels[0].Canny(minTrackBar.Value, maxTrackBar.Value);
-			pictureBox1.Image = cannyImg.ToBitmap();
-
-			if (houghCheckBox.Checked) {
-				Image<Bgr, byte> houghImg = HoughTransform(cannyImg);
-				houghImg.Draw(new LineSegment2D(new Point(310, 310), new Point(310, 330)), new Bgr(Color.Red), 2);
-				houghImg.Draw(new LineSegment2D(new Point(310, 310), new Point(330, 310)), new Bgr(Color.Red), 2);
-				houghImg.Draw(new LineSegment2D(new Point(310, 330), new Point(330, 330)), new Bgr(Color.Red), 2);
-				houghImg.Draw(new LineSegment2D(new Point(330, 310), new Point(330, 330)), new Bgr(Color.Red), 2);
-				pictureBox1.Image = houghImg.ToBitmap();
-			}
-		}
-
 		private void minTrackBar_Scroll(object sender, EventArgs e) {
 			edgeDetectButton_Click(null, null);
 			minLabel.Text = minTrackBar.Value.ToString();
@@ -278,22 +262,84 @@ namespace IduleProvider {
 			thresholdLabel.Text = houghThreshholdBar.Value.ToString();
 		}
 
+		private void downscalingBar_Scroll(object sender, EventArgs e) {
+			edgeDetectButton_Click(null, null);
+			downscalingLabel.Text = downscalingBar.Value.ToString();
+		}
+
+		private void colorFactorBar_Scroll(object sender, EventArgs e) {
+			edgeDetectButton_Click(null, null);
+			colorFactorLabel.Text = colorFactorBar.Value.ToString();
+		}
+
+		private void spatialFactorBar_Scroll(object sender, EventArgs e) {
+			edgeDetectButton_Click(null, null);
+			spatialFactorLabel.Text = spatialFactorBar.Value.ToString();
+		}
+
+		private void edgeDetectButton_Click(object sender, EventArgs e) {
+			// preprocessing stuff
+			Image<Bgr, byte> img = new Image<Bgr, byte>(displayAdapter1.Image.ConvertToBitmap());
+			//img.ROI = new Rectangle(new Point(10, 10), new Size(620, 620));
+			img.ROI = new Rectangle(new Point(260, 260), new Size(100, 100));
+			//img = img.SmoothBilatral(7, colorFactorBar.Value, spatialFactorBar.Value);
+			/*
+			img = img.SmoothGaussian(11);
+			for (int i = 0; i < downscalingBar.Value; i++) {
+				img = img.PyrDown();
+			}
+			for (int i = 0; i < downscalingBar.Value; i++) {
+				img = img.PyrUp();
+			}
+			
+			Image<Gray, byte> processedImg = img.Convert<Gray, byte>();
+			pictureBox1.Image = processedImg.ToBitmap();
+			*/
+
+			Image<Hsv, byte> hsvImg = img.Convert<Hsv, byte>();
+			Image<Gray, byte>[] hsvChannels = hsvImg.Split();
+			Image<Gray, byte> processedImg = hsvChannels[1].SmoothGaussian(11).PyrDown().PyrDown().PyrUp().PyrUp() ;
+			pictureBox1.Image = processedImg.ToBitmap();
+
+			if (cannyCheckBox.Checked) {
+				Image<Gray, byte> cannyImg = processedImg.Canny(minTrackBar.Value, maxTrackBar.Value);
+				pictureBox1.Image = cannyImg.ToBitmap();
+				if (houghCheckBox.Checked) {
+					Image<Bgr, byte> houghImg = PHoughTransform(cannyImg);
+					//Image<Bgr, byte> houghImg = HoughTransform(cannyImg);
+					houghImg.Draw(new Rectangle(new Point(260, 260), new Size(100, 100)), new Bgr(Color.Red), 2);
+					pictureBox1.Image = houghImg.ToBitmap();
+				}
+			}
+			
+		}
+
+		private Image<Bgr, byte> PHoughTransform(Image<Gray, byte> binaryImg) {
+			// probabilistic hough transform
+			Image<Bgr, byte> tempImg = binaryImg.Convert<Bgr, byte>();
+			LineSegment2D[][] houghLines = binaryImg.HoughLinesBinary(1.0, Math.PI / 180.0, houghThreshholdBar.Value, 25, 10.0);
+			foreach (LineSegment2D l in houghLines[0]) {
+				tempImg.Draw(l, new Bgr(0, 255, 0), 2);
+			}
+			return tempImg;
+		}
+
 		double angleThreshold = .1;
-		private Image<Bgr, byte> HoughTransform(Image<Gray, byte> cannyImg) {
-			Image<Bgr, byte> tempImg = cannyImg.Convert<Bgr, byte>();
+		private Image<Bgr, byte> HoughTransform(Image<Gray, byte> binaryImg) {
+			Image<Bgr, byte> tempImg = binaryImg.Convert<Bgr, byte>();
 			Emgu.CV.Util.VectorOfPointF points = new Emgu.CV.Util.VectorOfPointF();
-			CvInvoke.HoughLines(cannyImg, points, 1, Math.PI / 180.0, houghThreshholdBar.Value);
+			CvInvoke.HoughLines(binaryImg, points, 1, Math.PI / 180.0, houghThreshholdBar.Value);
 			PointF[] pointArray = points.ToArray();
 			List<polarEq> polarEqList = new List<polarEq>();
 			foreach (PointF p in pointArray) {
-				if (!(p.X == 7 && p.Y == 0) && !(p.X == 637 && p.Y == 0)) { // remove vertical lines (side)
+				if (!(p.X == 7 && p.Y == 0) && !(p.X == 637 && p.Y == 0) && !(p.X == 637 && p.Y == 1.570796)) { // remove unwanted lines
 					polarEqList.Add(new polarEq(p.X, p.Y));
 				}
 			}
 			polarEqList = polarEqList.OrderBy(list => list.theta).ToList();
 
-
-			List<int> splitIndices = new List<int>() { -1 }; // where to split
+			// where to split lines
+			List<int> splitIndices = new List<int>() { -1 };
 			for (int i = 0; i < polarEqList.Count - 1; i++) {
 				if ((polarEqList[i + 1].theta - polarEqList[i].theta) > angleThreshold) {
 					splitIndices.Add(i);
@@ -301,8 +347,8 @@ namespace IduleProvider {
 			}
 			splitIndices.Add(polarEqList.Count - 1);
 
-
-			List<List<polarEq>> eqGroups = new List<List<polarEq>>(); // split into groups
+			// split lines into groups
+			List<List<polarEq>> eqGroups = new List<List<polarEq>>();
 			for (int i = 0; i < splitIndices.Count - 1; i++) {
 				eqGroups.Add(polarEqList.Take(splitIndices[i + 1] + 1).Skip(splitIndices[i] + 1).ToList<polarEq>());
 			}
@@ -315,6 +361,7 @@ namespace IduleProvider {
 				; // eqGroups[0] is empty, no lines
 			}
 
+			// display line equations
 			outputLabel.Text = "";
 			foreach (List<polarEq> group in eqGroups) {
 				foreach (polarEq eq in group) {
@@ -322,16 +369,28 @@ namespace IduleProvider {
 				}
 				outputLabel.Text += "\n";
 			}
-
+			
+			// identify pattern
 			if (polarEqList.Count == 0) {
 				outputLabel2.Text = "No pattern.";
 			} else if (eqGroups.Count == 1) {
-				outputLabel2.Text = "Stripes.";
+				eqGroups[0].Sort(new sortRhoHelper());
+				bool stripes = false;
+				for (int i = 0; i < eqGroups[0].Count - 2; i++ ) {
+					if (eqGroups[0][i + 1].rho - eqGroups[0][i].rho > 10) {
+						stripes = true;
+					}
+				}
+				if (stripes) {
+					outputLabel2.Text = "Stripes.";
+				} else {
+					outputLabel2.Text = "Single Line.";
+				}
 			} else if (eqGroups.Count == 2 && (Math.Abs(Math.Abs(eqGroups.Last().Last().theta - eqGroups.First().First().theta) - Math.PI / 2) < angleThreshold)) {
 				// opencv angles from 0 to pi
-				outputLabel2.Text = "Checkers";
+				outputLabel2.Text = "Plaid/Checkered";
 			} else {
-				outputLabel2.Text = "unknown pattern";
+				outputLabel2.Text = "Irregular pattern.";
 			}
 
 			foreach (polarEq eq in polarEqList) { // drawing
@@ -340,26 +399,30 @@ namespace IduleProvider {
 
 			return tempImg;
 		}
-
+		
 		bool crossing;
 		private void checkCrossing() {
+			Thread beepThread = new Thread(new ThreadStart(delegate() { Console.Beep(1000, 100000); }));
+			beepThread.IsBackground = true;
 			bool temp = crossing;
 			edgeDetectButton_Click(null, null);
 			Bitmap snap = new Bitmap(pictureBox1.Image);
 			crossing = false;
-			for (int i = 310; i <= 330; i++) {
-				for (int j = 310; j <= 330; j++) {
-					if (snap.GetPixel(i, j).G == 255) {
+			for (int i = 0; i < 100; i++) {
+				for (int j = 0; j < 100; j++) {
+					if (snap.GetPixel(i, j).R == 0 && snap.GetPixel(i, j).G == 255 && snap.GetPixel(i, j).B == 0) {
 						crossing = true;
 					}
 				}
 			}
 			if (temp != crossing) {
+
 				if (crossing) {
 					//Console.Beep(1000, 100000);
+					beepThread.Start();
 					outputLabel3.Text = "crossing!!!";
 				} else {
-					//Console.Beep(1000, 1);
+					Console.Beep(1000, 1);
 					outputLabel3.Text = "not crossing!!!";
 				}
 			}
@@ -385,6 +448,18 @@ namespace IduleProvider {
 		}
 		public override string ToString() {
 			return string.Format("rho: {0}, theta: {1}", rho, theta);
+		}
+	}
+
+	public class sortRhoHelper : IComparer<polarEq> {
+		public int Compare(polarEq a, polarEq b) {
+			return a.rho == b.rho ? 0 : (a.rho > b.rho ? 1 : -1);
+		}
+	}
+
+	public class sortThetaHelper : IComparer<polarEq> {
+		public int Compare(polarEq a, polarEq b) {
+			return a.theta == b.theta ? 0 : (a.theta > b.theta ? 1 : -1);
 		}
 	}
 }

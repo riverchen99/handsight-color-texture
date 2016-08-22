@@ -5,11 +5,11 @@
 
 
 //#define IduleCam0_raw
-//#define IduleCam0_processed
+#define IduleCam0_processed
 //#define IduleCam1_raw
 //#define IduleCam1_processed
 //#define IduleStereo_raw
-#define IduleStereo_processed
+//#define IduleStereo_processed
 
 using System;
 using System.Collections.Generic;
@@ -166,7 +166,7 @@ namespace IduleCamProvider {
 			 */
 			if (Monitor.TryEnter(lockObj)) {
 				try {
-					//Invoke(new MethodInvoker(delegate { checkCrossing(); }));
+					Invoke(new MethodInvoker(delegate { checkCrossing(); }));
 				} catch { } finally { Monitor.Exit(lockObj); }
 			}
 		}
@@ -457,5 +457,15 @@ namespace IduleCamProvider {
 			GenerateHist(lumHistData);
 		}
 
+		string prevColor;
+		private void checkCrossing() {
+			Thread beepThread = new Thread(new ThreadStart(delegate() { Console.Beep(1000, 500); }));
+			beepThread.IsBackground = true;
+			guessButton_Click(null, null);
+			if (prevColor != similarityLabel.Text) {
+				beepThread.Start();
+				prevColor = similarityLabel.Text;
+			}
+		}
 	}
 }
