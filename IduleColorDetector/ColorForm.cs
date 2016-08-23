@@ -29,6 +29,7 @@ using Emgu.CV.Structure;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Text.RegularExpressions;
+using ColorMine;
 
 namespace IduleCamProvider {
 	public partial class ColorForm : Form {
@@ -300,7 +301,9 @@ namespace IduleCamProvider {
 			pxCount = 0;
 
 			Image<Bgr, byte> img = new Image<Bgr, byte>(displayAdapter1.Image.ConvertToBitmap());
-			img = img.PyrDown().PyrDown();
+
+			img = img.SmoothGaussian(7).PyrDown().PyrDown();
+			img.ROI = new Rectangle(new Point(75, 75), new Size(100, 100));
 			//pictureBox1.Image = img.PyrUp().PyrUp().ToBitmap();
 
 			Bitmap snap = img.ToBitmap();
@@ -311,15 +314,14 @@ namespace IduleCamProvider {
 					hueHistData[(int)(c.GetHue() * (bins / 360.0))]++;
 					satHistData[(int)((c.GetSaturation() - .00001) * bins)]++; // prevent c.GetSaturation() = 1
 					lumHistData[(int)((c.GetBrightness() - .00001) * bins)]++;
-					if (i > 100 && i < 150 && j > 100 && j < 150) {
-						totalR += c.R;
-						totalG += c.G;
-						totalB += c.B;
-						totalH += c.GetHue();
-						totalS += c.GetSaturation();
-						totalL += c.GetBrightness();
-						pxCount++;
-					}
+					totalR += c.R;
+					totalG += c.G;
+					totalB += c.B;
+					totalH += c.GetHue();
+					totalS += c.GetSaturation();
+					totalL += c.GetBrightness();
+					pxCount++;
+
 				}
 			}
 		}
@@ -416,24 +418,89 @@ namespace IduleCamProvider {
 					closestName = material.Item4;
 				}
 			}
-			similarityLabel.Text = closestName;
+			//Console.WriteLine(minDif);
+			if (minDif < 10000) {
+				similarityLabel.Text = closestName;
+			} else {
+				similarityLabel.Text = "???";
+			}
 		}
 
 		private void AverageColorButton_Click(object sender, EventArgs e) {
 			GetPixels();
 			// display average rgb color and closest knowncolor match
 			Color avgRGBColor = Color.FromArgb(totalR / pxCount, totalG / pxCount, totalB / pxCount);
-			Color closestColor = new Color();
+			Color avgHSLColor = ColorFromHSL(totalH / pxCount / 360, totalS / pxCount, totalL / pxCount);
+			Color closestRGBColor = Color.Black;
+			Color closestHueColor = Color.Black;
+			Color[] myColorList = { 
+									Color.Red,
+									Color.Orange, 
+									Color.Yellow, 
+									Color.Green, 
+									Color.Blue, 
+									Color.Purple, 
+									Color.Brown, 
+									Color.Pink, 
+									Color.White, 
+									Color.Gray, 
+									Color.LightGray,
+									Color.DarkGray,
+									Color.Black
+								  };
+			/*
 			foreach (KnownColor c in knownColors) {
 				closestColor = RGBColorDistance(avgRGBColor, Color.FromKnownColor(c)) < RGBColorDistance(avgRGBColor, closestColor) ? Color.FromKnownColor(c) : closestColor;
 			}
-			ColorLabel.Text = Regex.Replace(closestColor.Name, "(\\B[A-Z])", " $1");
+			*/
+			var colorMineAvg = new ColorMine.ColorSpaces.Rgb { R = totalR / pxCount, G = totalG / pxCount, B = totalB / pxCount };
+			var colorMineClosest = new ColorMine.ColorSpaces.Rgb { R = 0, G = 0, B = 0 };
+			foreach (Color c in myColorList) {
+				closestRGBColor = RGBColorDistance(avgRGBColor, c) < RGBColorDistance(avgRGBColor, closestRGBColor) ? c : closestRGBColor;
+				closestHueColor = Math.Abs(c.GetHue() - totalH / pxCount) < Math.Abs(closestHueColor.GetHue() - totalH / pxCount) ? c : closestHueColor;
+				colorMineClosest = colorMineAvg.Compare(colorMineClosest, new ColorMine.ColorSpaces.Comparisons.CieDe2000Comparison()) < colorMineAvg.Compare(new ColorMine.ColorSpaces.Rgb { R = c.R, G = c.G, B = c.B }, new ColorMine.ColorSpaces.Comparisons.CieDe2000Comparison()) ? colorMineClosest : new ColorMine.ColorSpaces.Rgb { R = c.R, G = c.G, B = c.B };
+
+				Console.WriteLine(colorMineAvg.Compare(new ColorMine.ColorSpaces.Rgb { R = c.R, G = c.G, B = c.B }, new ColorMine.ColorSpaces.Comparisons.CieDe2000Comparison()));
+			}
+			
+			Console.WriteLine("r {0}, g {1}, b {2}", colorMineClosest.R, colorMineClosest.G, colorMineClosest.B);
+			Console.WriteLine(colorMineAvg.Compare(colorMineClosest, new ColorMine.ColorSpaces.Comparisons.CieDe2000Comparison()));
+
+			/*
+			if (totalL / pxCount < .1) {
+				closestHueColor = Color.Black;
+			} else if (totalL / pxCount > .9) {
+				closestHueColor = Color.White;
+			} else if (totalL / pxCount < .2 && totalS / pxCount < .1) {
+				closestHueColor = Color.Gray;
+			}
+			*/
+
+			AvgRGBLabel.Text = String.Format("r {0}, g {1}, b {2}", avgRGBColor.R, avgRGBColor.G, avgRGBColor.B);
+			AvgRGBColorBox.BackColor = avgRGBColor;
+
+			AvgHSLLabel.Text = String.Format("h {0}, s {1}, l {2}", avgHSLColor.GetHue(), avgHSLColor.GetSaturation(), avgHSLColor.GetBrightness());
+			AvgHSLColorBox.BackColor = avgHSLColor;
+
+			ClosestRGBLabel.Text = String.Format("r {0}, g {1}, b {2}", closestRGBColor.R, closestRGBColor.G, closestRGBColor.B) + " " + Regex.Replace(closestRGBColor.Name, "(\\B[A-Z])", " $1");
+			ClosestRGBColorBox.BackColor = closestRGBColor;
+
+			ClosestHueLabel.Text = String.Format("h {0}, s {1}, l {2}", closestHueColor.GetHue(), closestHueColor.GetSaturation(), closestHueColor.GetBrightness()) + " " + Regex.Replace(closestHueColor.Name, "(\\B[A-Z])", " $1");
+			ClosestHueColorBox.BackColor = closestHueColor;
+			//ClosestHueColorBox.BackColor = ColorFromHSL(closestHueColor.GetHue() / 360, totalS / pxCount, totalL / pxCount);
+
+			CIERGBLabel.Text = String.Format("r {0}, g {1}, b {2}", (int)colorMineClosest.R, (int)colorMineClosest.G, (int)colorMineClosest.B);
+			CIERGBColorBox.BackColor = Color.FromArgb((int) colorMineClosest.R, (int) colorMineClosest.G, (int) colorMineClosest.B);
+
+			if (colorMineClosest.R == 255 && colorMineClosest.G == 255 && colorMineClosest.B == 255) {
+				FinalColorGuessLabel.Text = "White";
+			} else if (colorMineClosest.R == 0 && colorMineClosest.G == 0 && colorMineClosest.B == 0) {
+				FinalColorGuessLabel.Text = "Black";
+			} else {
+				FinalColorGuessLabel.Text = Regex.Replace(closestHueColor.Name, "(\\B[A-Z])", " $1");
+			}
+
 			//TTS(Regex.Replace(closestColor.Name, "(\\B[A-Z])", " $1"));
-			actualColorBox.BackColor = avgRGBColor;
-			closestColorBox.BackColor = closestColor;
-
-			//Image<Bgr, Byte> img = new Image<Bgr, Byte>(new Bitmap(pictureBox1.Image)); // what is going on
-
 			/*
 			Bitmap snap = new Bitmap(pictureBox1.Image);
 			var colorThief = new ColorThief.ColorThief();

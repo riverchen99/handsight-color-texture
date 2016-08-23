@@ -39,17 +39,28 @@
 			this.similarityLabel = new System.Windows.Forms.Label();
 			this.guessButton = new System.Windows.Forms.Button();
 			this.saveButton = new System.Windows.Forms.Button();
-			this.closestColorBox = new System.Windows.Forms.PictureBox();
-			this.ColorLabel = new System.Windows.Forms.Label();
-			this.actualColorBox = new System.Windows.Forms.PictureBox();
+			this.ClosestRGBColorBox = new System.Windows.Forms.PictureBox();
+			this.ClosestRGBLabel = new System.Windows.Forms.Label();
+			this.AvgRGBColorBox = new System.Windows.Forms.PictureBox();
 			this.AverageColorButton = new System.Windows.Forms.Button();
 			this.smoothedHistBox = new System.Windows.Forms.PictureBox();
 			this.histBox = new System.Windows.Forms.PictureBox();
+			this.AvgRGBLabel = new System.Windows.Forms.Label();
+			this.ClosestHueColorBox = new System.Windows.Forms.PictureBox();
+			this.ClosestHueLabel = new System.Windows.Forms.Label();
+			this.AvgHSLLabel = new System.Windows.Forms.Label();
+			this.AvgHSLColorBox = new System.Windows.Forms.PictureBox();
+			this.CIERGBColorBox = new System.Windows.Forms.PictureBox();
+			this.FinalColorGuessLabel = new System.Windows.Forms.Label();
+			this.CIERGBLabel = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.closestColorBox)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.actualColorBox)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.ClosestRGBColorBox)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.AvgRGBColorBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.smoothedHistBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.histBox)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.ClosestHueColorBox)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.AvgHSLColorBox)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.CIERGBColorBox)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// displayAdapter1
@@ -116,7 +127,7 @@
 			this.trackBar1.Size = new System.Drawing.Size(139, 31);
 			this.trackBar1.TabIndex = 34;
 			this.trackBar1.TickStyle = System.Windows.Forms.TickStyle.None;
-			this.trackBar1.Value = 5;
+			this.trackBar1.Value = 10;
 			this.trackBar1.Scroll += new System.EventHandler(this.trackBar1_Scroll);
 			// 
 			// saveRawImgButton
@@ -154,7 +165,7 @@
 			// 
 			// LumHistButton
 			// 
-			this.LumHistButton.Location = new System.Drawing.Point(88, 704);
+			this.LumHistButton.Location = new System.Drawing.Point(13, 784);
 			this.LumHistButton.Name = "LumHistButton";
 			this.LumHistButton.Size = new System.Drawing.Size(91, 42);
 			this.LumHistButton.TabIndex = 61;
@@ -164,7 +175,7 @@
 			// 
 			// SatHistButton
 			// 
-			this.SatHistButton.Location = new System.Drawing.Point(88, 637);
+			this.SatHistButton.Location = new System.Drawing.Point(13, 736);
 			this.SatHistButton.Name = "SatHistButton";
 			this.SatHistButton.Size = new System.Drawing.Size(91, 42);
 			this.SatHistButton.TabIndex = 60;
@@ -174,7 +185,7 @@
 			// 
 			// HueHistButton
 			// 
-			this.HueHistButton.Location = new System.Drawing.Point(88, 572);
+			this.HueHistButton.Location = new System.Drawing.Point(13, 688);
 			this.HueHistButton.Name = "HueHistButton";
 			this.HueHistButton.Size = new System.Drawing.Size(91, 42);
 			this.HueHistButton.TabIndex = 59;
@@ -218,38 +229,38 @@
 			this.saveButton.UseVisualStyleBackColor = true;
 			this.saveButton.Click += new System.EventHandler(this.saveButton_Click);
 			// 
-			// closestColorBox
+			// ClosestRGBColorBox
 			// 
-			this.closestColorBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.closestColorBox.Location = new System.Drawing.Point(139, 438);
-			this.closestColorBox.Margin = new System.Windows.Forms.Padding(4);
-			this.closestColorBox.Name = "closestColorBox";
-			this.closestColorBox.Size = new System.Drawing.Size(101, 94);
-			this.closestColorBox.TabIndex = 54;
-			this.closestColorBox.TabStop = false;
+			this.ClosestRGBColorBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.ClosestRGBColorBox.Location = new System.Drawing.Point(139, 438);
+			this.ClosestRGBColorBox.Margin = new System.Windows.Forms.Padding(4);
+			this.ClosestRGBColorBox.Name = "ClosestRGBColorBox";
+			this.ClosestRGBColorBox.Size = new System.Drawing.Size(101, 94);
+			this.ClosestRGBColorBox.TabIndex = 54;
+			this.ClosestRGBColorBox.TabStop = false;
 			// 
-			// ColorLabel
+			// ClosestRGBLabel
 			// 
-			this.ColorLabel.AutoSize = true;
-			this.ColorLabel.Location = new System.Drawing.Point(140, 417);
-			this.ColorLabel.Name = "ColorLabel";
-			this.ColorLabel.Size = new System.Drawing.Size(23, 17);
-			this.ColorLabel.TabIndex = 53;
-			this.ColorLabel.Text = "---";
+			this.ClosestRGBLabel.AutoSize = true;
+			this.ClosestRGBLabel.Location = new System.Drawing.Point(140, 417);
+			this.ClosestRGBLabel.Name = "ClosestRGBLabel";
+			this.ClosestRGBLabel.Size = new System.Drawing.Size(23, 17);
+			this.ClosestRGBLabel.TabIndex = 53;
+			this.ClosestRGBLabel.Text = "---";
 			// 
-			// actualColorBox
+			// AvgRGBColorBox
 			// 
-			this.actualColorBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.actualColorBox.Location = new System.Drawing.Point(12, 438);
-			this.actualColorBox.Margin = new System.Windows.Forms.Padding(4);
-			this.actualColorBox.Name = "actualColorBox";
-			this.actualColorBox.Size = new System.Drawing.Size(101, 94);
-			this.actualColorBox.TabIndex = 52;
-			this.actualColorBox.TabStop = false;
+			this.AvgRGBColorBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.AvgRGBColorBox.Location = new System.Drawing.Point(12, 438);
+			this.AvgRGBColorBox.Margin = new System.Windows.Forms.Padding(4);
+			this.AvgRGBColorBox.Name = "AvgRGBColorBox";
+			this.AvgRGBColorBox.Size = new System.Drawing.Size(101, 94);
+			this.AvgRGBColorBox.TabIndex = 52;
+			this.AvgRGBColorBox.TabStop = false;
 			// 
 			// AverageColorButton
 			// 
-			this.AverageColorButton.Location = new System.Drawing.Point(88, 368);
+			this.AverageColorButton.Location = new System.Drawing.Point(29, 364);
 			this.AverageColorButton.Name = "AverageColorButton";
 			this.AverageColorButton.Size = new System.Drawing.Size(75, 42);
 			this.AverageColorButton.TabIndex = 51;
@@ -277,11 +288,94 @@
 			this.histBox.TabIndex = 62;
 			this.histBox.TabStop = false;
 			// 
+			// AvgRGBLabel
+			// 
+			this.AvgRGBLabel.AutoSize = true;
+			this.AvgRGBLabel.Location = new System.Drawing.Point(17, 417);
+			this.AvgRGBLabel.Name = "AvgRGBLabel";
+			this.AvgRGBLabel.Size = new System.Drawing.Size(23, 17);
+			this.AvgRGBLabel.TabIndex = 64;
+			this.AvgRGBLabel.Text = "---";
+			// 
+			// ClosestHueColorBox
+			// 
+			this.ClosestHueColorBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.ClosestHueColorBox.Location = new System.Drawing.Point(139, 565);
+			this.ClosestHueColorBox.Margin = new System.Windows.Forms.Padding(4);
+			this.ClosestHueColorBox.Name = "ClosestHueColorBox";
+			this.ClosestHueColorBox.Size = new System.Drawing.Size(101, 94);
+			this.ClosestHueColorBox.TabIndex = 66;
+			this.ClosestHueColorBox.TabStop = false;
+			// 
+			// ClosestHueLabel
+			// 
+			this.ClosestHueLabel.AutoSize = true;
+			this.ClosestHueLabel.Location = new System.Drawing.Point(140, 665);
+			this.ClosestHueLabel.Name = "ClosestHueLabel";
+			this.ClosestHueLabel.Size = new System.Drawing.Size(23, 17);
+			this.ClosestHueLabel.TabIndex = 65;
+			this.ClosestHueLabel.Text = "---";
+			// 
+			// AvgHSLLabel
+			// 
+			this.AvgHSLLabel.AutoSize = true;
+			this.AvgHSLLabel.Location = new System.Drawing.Point(14, 544);
+			this.AvgHSLLabel.Name = "AvgHSLLabel";
+			this.AvgHSLLabel.Size = new System.Drawing.Size(23, 17);
+			this.AvgHSLLabel.TabIndex = 68;
+			this.AvgHSLLabel.Text = "---";
+			// 
+			// AvgHSLColorBox
+			// 
+			this.AvgHSLColorBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.AvgHSLColorBox.Location = new System.Drawing.Point(12, 565);
+			this.AvgHSLColorBox.Margin = new System.Windows.Forms.Padding(4);
+			this.AvgHSLColorBox.Name = "AvgHSLColorBox";
+			this.AvgHSLColorBox.Size = new System.Drawing.Size(101, 94);
+			this.AvgHSLColorBox.TabIndex = 67;
+			this.AvgHSLColorBox.TabStop = false;
+			// 
+			// CIERGBColorBox
+			// 
+			this.CIERGBColorBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.CIERGBColorBox.Location = new System.Drawing.Point(139, 707);
+			this.CIERGBColorBox.Margin = new System.Windows.Forms.Padding(4);
+			this.CIERGBColorBox.Name = "CIERGBColorBox";
+			this.CIERGBColorBox.Size = new System.Drawing.Size(101, 94);
+			this.CIERGBColorBox.TabIndex = 69;
+			this.CIERGBColorBox.TabStop = false;
+			// 
+			// FinalColorGuessLabel
+			// 
+			this.FinalColorGuessLabel.AutoSize = true;
+			this.FinalColorGuessLabel.Location = new System.Drawing.Point(172, 377);
+			this.FinalColorGuessLabel.Name = "FinalColorGuessLabel";
+			this.FinalColorGuessLabel.Size = new System.Drawing.Size(23, 17);
+			this.FinalColorGuessLabel.TabIndex = 70;
+			this.FinalColorGuessLabel.Text = "---";
+			// 
+			// CIERGBLabel
+			// 
+			this.CIERGBLabel.AutoSize = true;
+			this.CIERGBLabel.Location = new System.Drawing.Point(136, 809);
+			this.CIERGBLabel.Name = "CIERGBLabel";
+			this.CIERGBLabel.Size = new System.Drawing.Size(23, 17);
+			this.CIERGBLabel.TabIndex = 71;
+			this.CIERGBLabel.Text = "---";
+			// 
 			// ColorForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(1906, 826);
+			this.Controls.Add(this.CIERGBLabel);
+			this.Controls.Add(this.FinalColorGuessLabel);
+			this.Controls.Add(this.CIERGBColorBox);
+			this.Controls.Add(this.AvgHSLLabel);
+			this.Controls.Add(this.AvgHSLColorBox);
+			this.Controls.Add(this.ClosestHueColorBox);
+			this.Controls.Add(this.ClosestHueLabel);
+			this.Controls.Add(this.AvgRGBLabel);
 			this.Controls.Add(this.smoothedHistBox);
 			this.Controls.Add(this.histBox);
 			this.Controls.Add(this.LumHistButton);
@@ -291,9 +385,9 @@
 			this.Controls.Add(this.similarityLabel);
 			this.Controls.Add(this.guessButton);
 			this.Controls.Add(this.saveButton);
-			this.Controls.Add(this.closestColorBox);
-			this.Controls.Add(this.ColorLabel);
-			this.Controls.Add(this.actualColorBox);
+			this.Controls.Add(this.ClosestRGBColorBox);
+			this.Controls.Add(this.ClosestRGBLabel);
+			this.Controls.Add(this.AvgRGBColorBox);
 			this.Controls.Add(this.AverageColorButton);
 			this.Controls.Add(this.displayAdapter1);
 			this.Controls.Add(this.button5);
@@ -307,10 +401,13 @@
 			this.Name = "ColorForm";
 			this.Text = "ColorForm";
 			((System.ComponentModel.ISupportInitialize)(this.trackBar1)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.closestColorBox)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.actualColorBox)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.ClosestRGBColorBox)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.AvgRGBColorBox)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.smoothedHistBox)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.histBox)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.ClosestHueColorBox)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.AvgHSLColorBox)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.CIERGBColorBox)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -334,11 +431,19 @@
 		private System.Windows.Forms.Label similarityLabel;
 		private System.Windows.Forms.Button guessButton;
 		private System.Windows.Forms.Button saveButton;
-		private System.Windows.Forms.PictureBox closestColorBox;
-		private System.Windows.Forms.Label ColorLabel;
-		private System.Windows.Forms.PictureBox actualColorBox;
+		private System.Windows.Forms.PictureBox ClosestRGBColorBox;
+		private System.Windows.Forms.Label ClosestRGBLabel;
+		private System.Windows.Forms.PictureBox AvgRGBColorBox;
 		private System.Windows.Forms.Button AverageColorButton;
 		private System.Windows.Forms.PictureBox smoothedHistBox;
 		private System.Windows.Forms.PictureBox histBox;
+		private System.Windows.Forms.Label AvgRGBLabel;
+		private System.Windows.Forms.PictureBox ClosestHueColorBox;
+		private System.Windows.Forms.Label ClosestHueLabel;
+		private System.Windows.Forms.Label AvgHSLLabel;
+		private System.Windows.Forms.PictureBox AvgHSLColorBox;
+		private System.Windows.Forms.PictureBox CIERGBColorBox;
+		private System.Windows.Forms.Label FinalColorGuessLabel;
+		private System.Windows.Forms.Label CIERGBLabel;
 	}
 }

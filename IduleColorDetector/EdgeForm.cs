@@ -280,8 +280,8 @@ namespace IduleProvider {
 		private void edgeDetectButton_Click(object sender, EventArgs e) {
 			// preprocessing stuff
 			Image<Bgr, byte> img = new Image<Bgr, byte>(displayAdapter1.Image.ConvertToBitmap());
-			//img.ROI = new Rectangle(new Point(10, 10), new Size(620, 620));
-			img.ROI = new Rectangle(new Point(260, 260), new Size(100, 100));
+			img.ROI = new Rectangle(new Point(10, 10), new Size(620, 620));
+			//img.ROI = new Rectangle(new Point(260, 260), new Size(100, 100));
 			//img = img.SmoothBilatral(7, colorFactorBar.Value, spatialFactorBar.Value);
 			/*
 			img = img.SmoothGaussian(11);
@@ -408,8 +408,8 @@ namespace IduleProvider {
 			edgeDetectButton_Click(null, null);
 			Bitmap snap = new Bitmap(pictureBox1.Image);
 			crossing = false;
-			for (int i = 0; i < 100; i++) {
-				for (int j = 0; j < 100; j++) {
+			for (int i = 260; i < 360; i++) {
+				for (int j = 260; j < 360; j++) {
 					if (snap.GetPixel(i, j).R == 0 && snap.GetPixel(i, j).G == 255 && snap.GetPixel(i, j).B == 0) {
 						crossing = true;
 					}
