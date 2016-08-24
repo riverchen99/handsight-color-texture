@@ -30,6 +30,9 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Text.RegularExpressions;
 using ColorMine;
+using System.IO.Ports;
+using System.Speech.Synthesis;
+
 
 namespace IduleCamProvider {
 	public partial class ColorForm : Form {
@@ -74,6 +77,8 @@ namespace IduleCamProvider {
 		int totalR = 0, totalG = 0, totalB = 0;
 		float totalH = 0, totalS = 0, totalL = 0;
 		int pxCount;// = 62500;
+		SerialPort mySerialPort;
+		private SpeechSynthesizer reader = new SpeechSynthesizer();
 		/// <summary>
 		/// Camera Initialization
 		/// IduleProviderCsCam(0) -> initialize first camera that is connected
@@ -144,6 +149,19 @@ namespace IduleCamProvider {
 				knownColors.Remove(c);
 			}
 
+			try {
+				mySerialPort = new SerialPort("COM7", 9600);
+				mySerialPort.DataReceived += new SerialDataReceivedEventHandler(DataReceivedHandler);
+				mySerialPort.DtrEnable = true;
+				mySerialPort.RtsEnable = true;
+				mySerialPort.Open();
+			} catch { ; }
+		}
+
+		
+
+		private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e) {
+			Invoke(new MethodInvoker(delegate { CheckColorButton_Click(null, null); }));
 		}
 
 		private void provider_Exception(object sender, OnExceptionEventArgs e) {
@@ -167,7 +185,7 @@ namespace IduleCamProvider {
 			 */
 			if (Monitor.TryEnter(lockObj)) {
 				try {
-					Invoke(new MethodInvoker(delegate { checkCrossing(); }));
+					//Invoke(new MethodInvoker(delegate { checkCrossing(); }));
 				} catch { } finally { Monitor.Exit(lockObj); }
 			}
 		}
@@ -291,6 +309,11 @@ namespace IduleCamProvider {
 			}
 		}
 
+		private void TTS(string text) {
+			reader.SpeakAsyncCancelAll();
+			reader.SpeakAsync(text);
+		}
+
 		private void GetPixels() {
 			hueHistData = new List<int>(new int[bins]);
 			satHistData = new List<int>(new int[bins]);
@@ -303,7 +326,7 @@ namespace IduleCamProvider {
 			Image<Bgr, byte> img = new Image<Bgr, byte>(displayAdapter1.Image.ConvertToBitmap());
 
 			img = img.SmoothGaussian(7).PyrDown().PyrDown();
-			img.ROI = new Rectangle(new Point(75, 75), new Size(100, 100));
+			//img.ROI = new Rectangle(new Point(75, 75), new Size(100, 100));
 			//pictureBox1.Image = img.PyrUp().PyrUp().ToBitmap();
 
 			Bitmap snap = img.ToBitmap();
@@ -426,14 +449,13 @@ namespace IduleCamProvider {
 			}
 		}
 
-		private void AverageColorButton_Click(object sender, EventArgs e) {
+		private void CheckColorButton_Click(object sender, EventArgs e) {
 			GetPixels();
 			// display average rgb color and closest knowncolor match
 			Color avgRGBColor = Color.FromArgb(totalR / pxCount, totalG / pxCount, totalB / pxCount);
 			Color avgHSLColor = ColorFromHSL(totalH / pxCount / 360, totalS / pxCount, totalL / pxCount);
-			Color closestRGBColor = Color.Black;
-			Color closestHueColor = Color.Black;
-			Color[] myColorList = { 
+			
+			Color[] colorList = { 
 									Color.Red,
 									Color.Orange, 
 									Color.Yellow, 
@@ -453,18 +475,52 @@ namespace IduleCamProvider {
 				closestColor = RGBColorDistance(avgRGBColor, Color.FromKnownColor(c)) < RGBColorDistance(avgRGBColor, closestColor) ? Color.FromKnownColor(c) : closestColor;
 			}
 			*/
+
+			// find peaks in hue hist
+			List<int> hueHistPeaks = new List<int>();
+			if (hueHistData[0] > hueHistData[1] && hueHistData[0] > hueHistData[hueHistData.Count - 1] && hueHistData[0] > 1000) {
+				hueHistPeaks.Add(0);
+			}
+			if (hueHistData[hueHistData.Count - 1] > hueHistData[hueHistData.Count - 2] && hueHistData[hueHistData.Count - 1] > hueHistData[0] && hueHistData[0] > 1000 && hueHistData[hueHistData.Count-1] > 100) {
+				hueHistPeaks.Add(hueHistData.Count - 1);
+			}
+			for (int i = 1; i < bins - 1; i++) {
+				if (hueHistData[i] > hueHistData[i + 1] && hueHistData[i] > hueHistData[i - 1] && hueHistData[i] > 1000) {
+					hueHistPeaks.Add(i);
+				}
+			}
+
+			List<Color> closestHueColors = new List<Color>();
+			foreach (int i in hueHistPeaks) {
+				Color closestHueColor = Color.Black;
+				foreach (Color c in colorList) {
+					closestHueColor = Math.Abs(closestHueColor.GetHue() - 360.0 * i / bins) < Math.Abs(c.GetHue() - 360.0 * i / bins) ? closestHueColor : c;
+				}
+				closestHueColors.Add(closestHueColor);
+			}
+
+			/*
+			foreach (int i in hueHistPeaks) {
+				Console.WriteLine(i);
+				Console.WriteLine("{0}, {1}, {2}", hueHistData[i - 1], hueHistData[i], hueHistData[i + 1]);
+			}
+			*/
+
+
+			Color closestRGBColor = Color.Black;
 			var colorMineAvg = new ColorMine.ColorSpaces.Rgb { R = totalR / pxCount, G = totalG / pxCount, B = totalB / pxCount };
 			var colorMineClosest = new ColorMine.ColorSpaces.Rgb { R = 0, G = 0, B = 0 };
-			foreach (Color c in myColorList) {
+			foreach (Color c in colorList) {
 				closestRGBColor = RGBColorDistance(avgRGBColor, c) < RGBColorDistance(avgRGBColor, closestRGBColor) ? c : closestRGBColor;
-				closestHueColor = Math.Abs(c.GetHue() - totalH / pxCount) < Math.Abs(closestHueColor.GetHue() - totalH / pxCount) ? c : closestHueColor;
+				//closestHueColor = Math.Abs(c.GetHue() - totalH / pxCount) < Math.Abs(closestHueColor.GetHue() - totalH / pxCount) ? c : closestHueColor;
 				colorMineClosest = colorMineAvg.Compare(colorMineClosest, new ColorMine.ColorSpaces.Comparisons.CieDe2000Comparison()) < colorMineAvg.Compare(new ColorMine.ColorSpaces.Rgb { R = c.R, G = c.G, B = c.B }, new ColorMine.ColorSpaces.Comparisons.CieDe2000Comparison()) ? colorMineClosest : new ColorMine.ColorSpaces.Rgb { R = c.R, G = c.G, B = c.B };
-
-				Console.WriteLine(colorMineAvg.Compare(new ColorMine.ColorSpaces.Rgb { R = c.R, G = c.G, B = c.B }, new ColorMine.ColorSpaces.Comparisons.CieDe2000Comparison()));
+				//Console.WriteLine(colorMineAvg.Compare(new ColorMine.ColorSpaces.Rgb { R = c.R, G = c.G, B = c.B }, new ColorMine.ColorSpaces.Comparisons.CieDe2000Comparison()));
 			}
+
 			
-			Console.WriteLine("r {0}, g {1}, b {2}", colorMineClosest.R, colorMineClosest.G, colorMineClosest.B);
-			Console.WriteLine(colorMineAvg.Compare(colorMineClosest, new ColorMine.ColorSpaces.Comparisons.CieDe2000Comparison()));
+			
+			//Console.WriteLine("r {0}, g {1}, b {2}", colorMineClosest.R, colorMineClosest.G, colorMineClosest.B);
+			//Console.WriteLine(colorMineAvg.Compare(colorMineClosest, new ColorMine.ColorSpaces.Comparisons.CieDe2000Comparison()));
 
 			/*
 			if (totalL / pxCount < .1) {
@@ -485,8 +541,8 @@ namespace IduleCamProvider {
 			ClosestRGBLabel.Text = String.Format("r {0}, g {1}, b {2}", closestRGBColor.R, closestRGBColor.G, closestRGBColor.B) + " " + Regex.Replace(closestRGBColor.Name, "(\\B[A-Z])", " $1");
 			ClosestRGBColorBox.BackColor = closestRGBColor;
 
-			ClosestHueLabel.Text = String.Format("h {0}, s {1}, l {2}", closestHueColor.GetHue(), closestHueColor.GetSaturation(), closestHueColor.GetBrightness()) + " " + Regex.Replace(closestHueColor.Name, "(\\B[A-Z])", " $1");
-			ClosestHueColorBox.BackColor = closestHueColor;
+			//ClosestHueLabel.Text = String.Format("h {0}, s {1}, l {2}", closestHueColor.GetHue(), closestHueColor.GetSaturation(), closestHueColor.GetBrightness()) + " " + Regex.Replace(closestHueColor.Name, "(\\B[A-Z])", " $1");
+			//ClosestHueColorBox.BackColor = closestHueColor;
 			//ClosestHueColorBox.BackColor = ColorFromHSL(closestHueColor.GetHue() / 360, totalS / pxCount, totalL / pxCount);
 
 			CIERGBLabel.Text = String.Format("r {0}, g {1}, b {2}", (int)colorMineClosest.R, (int)colorMineClosest.G, (int)colorMineClosest.B);
@@ -497,10 +553,15 @@ namespace IduleCamProvider {
 			} else if (colorMineClosest.R == 0 && colorMineClosest.G == 0 && colorMineClosest.B == 0) {
 				FinalColorGuessLabel.Text = "Black";
 			} else {
-				FinalColorGuessLabel.Text = Regex.Replace(closestHueColor.Name, "(\\B[A-Z])", " $1");
+				List<string> closestHueNames = new List<string>();
+				foreach (Color c in closestHueColors) {
+					closestHueNames.Add(Regex.Replace(c.Name, "(\\B[A-Z])", " $1"));
+				}
+				FinalColorGuessLabel.Text = string.Join(" and ", closestHueNames);
 			}
 
-			//TTS(Regex.Replace(closestColor.Name, "(\\B[A-Z])", " $1"));
+			TTS(FinalColorGuessLabel.Text);
+			
 			/*
 			Bitmap snap = new Bitmap(pictureBox1.Image);
 			var colorThief = new ColorThief.ColorThief();
@@ -528,10 +589,12 @@ namespace IduleCamProvider {
 		private void checkCrossing() {
 			Thread beepThread = new Thread(new ThreadStart(delegate() { Console.Beep(1000, 500); }));
 			beepThread.IsBackground = true;
-			guessButton_Click(null, null);
-			if (prevColor != similarityLabel.Text) {
+			//guessButton_Click(null, null);
+			CheckColorButton_Click(null, null);
+			if (prevColor != FinalColorGuessLabel.Text) {
 				beepThread.Start();
-				prevColor = similarityLabel.Text;
+				TTS(FinalColorGuessLabel.Text);
+				prevColor = FinalColorGuessLabel.Text;
 			}
 		}
 	}

@@ -305,8 +305,8 @@ namespace IduleProvider {
 				Image<Gray, byte> cannyImg = processedImg.Canny(minTrackBar.Value, maxTrackBar.Value);
 				pictureBox1.Image = cannyImg.ToBitmap();
 				if (houghCheckBox.Checked) {
-					Image<Bgr, byte> houghImg = PHoughTransform(cannyImg);
-					//Image<Bgr, byte> houghImg = HoughTransform(cannyImg);
+					//Image<Bgr, byte> houghImg = PHoughTransform(cannyImg);
+					Image<Bgr, byte> houghImg = HoughTransform(cannyImg);
 					houghImg.Draw(new Rectangle(new Point(260, 260), new Size(100, 100)), new Bgr(Color.Red), 2);
 					pictureBox1.Image = houghImg.ToBitmap();
 				}

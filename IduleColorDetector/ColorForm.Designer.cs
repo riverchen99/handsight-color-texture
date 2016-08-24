@@ -42,7 +42,7 @@
 			this.ClosestRGBColorBox = new System.Windows.Forms.PictureBox();
 			this.ClosestRGBLabel = new System.Windows.Forms.Label();
 			this.AvgRGBColorBox = new System.Windows.Forms.PictureBox();
-			this.AverageColorButton = new System.Windows.Forms.Button();
+			this.CheckColorButton = new System.Windows.Forms.Button();
 			this.smoothedHistBox = new System.Windows.Forms.PictureBox();
 			this.histBox = new System.Windows.Forms.PictureBox();
 			this.AvgRGBLabel = new System.Windows.Forms.Label();
@@ -258,15 +258,15 @@
 			this.AvgRGBColorBox.TabIndex = 52;
 			this.AvgRGBColorBox.TabStop = false;
 			// 
-			// AverageColorButton
+			// CheckColorButton
 			// 
-			this.AverageColorButton.Location = new System.Drawing.Point(29, 364);
-			this.AverageColorButton.Name = "AverageColorButton";
-			this.AverageColorButton.Size = new System.Drawing.Size(75, 42);
-			this.AverageColorButton.TabIndex = 51;
-			this.AverageColorButton.Text = "Check Color";
-			this.AverageColorButton.UseVisualStyleBackColor = true;
-			this.AverageColorButton.Click += new System.EventHandler(this.AverageColorButton_Click);
+			this.CheckColorButton.Location = new System.Drawing.Point(29, 364);
+			this.CheckColorButton.Name = "CheckColorButton";
+			this.CheckColorButton.Size = new System.Drawing.Size(75, 42);
+			this.CheckColorButton.TabIndex = 51;
+			this.CheckColorButton.Text = "Check Color";
+			this.CheckColorButton.UseVisualStyleBackColor = true;
+			this.CheckColorButton.Click += new System.EventHandler(this.CheckColorButton_Click);
 			// 
 			// smoothedHistBox
 			// 
@@ -388,7 +388,7 @@
 			this.Controls.Add(this.ClosestRGBColorBox);
 			this.Controls.Add(this.ClosestRGBLabel);
 			this.Controls.Add(this.AvgRGBColorBox);
-			this.Controls.Add(this.AverageColorButton);
+			this.Controls.Add(this.CheckColorButton);
 			this.Controls.Add(this.displayAdapter1);
 			this.Controls.Add(this.button5);
 			this.Controls.Add(this.button4);
@@ -434,7 +434,7 @@
 		private System.Windows.Forms.PictureBox ClosestRGBColorBox;
 		private System.Windows.Forms.Label ClosestRGBLabel;
 		private System.Windows.Forms.PictureBox AvgRGBColorBox;
-		private System.Windows.Forms.Button AverageColorButton;
+		private System.Windows.Forms.Button CheckColorButton;
 		private System.Windows.Forms.PictureBox smoothedHistBox;
 		private System.Windows.Forms.PictureBox histBox;
 		private System.Windows.Forms.Label AvgRGBLabel;
