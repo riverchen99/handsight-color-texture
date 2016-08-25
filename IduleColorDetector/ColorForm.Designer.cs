@@ -1,4 +1,4 @@
-﻿namespace IduleCamProvider {
+﻿namespace IduleProvider {
 	partial class ColorForm {
 		/// <summary>
 		/// Required designer variable.
@@ -165,7 +165,7 @@
 			// 
 			// LumHistButton
 			// 
-			this.LumHistButton.Location = new System.Drawing.Point(13, 784);
+			this.LumHistButton.Location = new System.Drawing.Point(214, 912);
 			this.LumHistButton.Name = "LumHistButton";
 			this.LumHistButton.Size = new System.Drawing.Size(91, 42);
 			this.LumHistButton.TabIndex = 61;
@@ -175,7 +175,7 @@
 			// 
 			// SatHistButton
 			// 
-			this.SatHistButton.Location = new System.Drawing.Point(13, 736);
+			this.SatHistButton.Location = new System.Drawing.Point(117, 912);
 			this.SatHistButton.Name = "SatHistButton";
 			this.SatHistButton.Size = new System.Drawing.Size(91, 42);
 			this.SatHistButton.TabIndex = 60;
@@ -185,7 +185,7 @@
 			// 
 			// HueHistButton
 			// 
-			this.HueHistButton.Location = new System.Drawing.Point(13, 688);
+			this.HueHistButton.Location = new System.Drawing.Point(20, 912);
 			this.HueHistButton.Name = "HueHistButton";
 			this.HueHistButton.Size = new System.Drawing.Size(91, 42);
 			this.HueHistButton.TabIndex = 59;
@@ -232,7 +232,7 @@
 			// ClosestRGBColorBox
 			// 
 			this.ClosestRGBColorBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.ClosestRGBColorBox.Location = new System.Drawing.Point(139, 438);
+			this.ClosestRGBColorBox.Location = new System.Drawing.Point(139, 517);
 			this.ClosestRGBColorBox.Margin = new System.Windows.Forms.Padding(4);
 			this.ClosestRGBColorBox.Name = "ClosestRGBColorBox";
 			this.ClosestRGBColorBox.Size = new System.Drawing.Size(101, 94);
@@ -242,7 +242,7 @@
 			// ClosestRGBLabel
 			// 
 			this.ClosestRGBLabel.AutoSize = true;
-			this.ClosestRGBLabel.Location = new System.Drawing.Point(140, 417);
+			this.ClosestRGBLabel.Location = new System.Drawing.Point(140, 496);
 			this.ClosestRGBLabel.Name = "ClosestRGBLabel";
 			this.ClosestRGBLabel.Size = new System.Drawing.Size(23, 17);
 			this.ClosestRGBLabel.TabIndex = 53;
@@ -251,7 +251,7 @@
 			// AvgRGBColorBox
 			// 
 			this.AvgRGBColorBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.AvgRGBColorBox.Location = new System.Drawing.Point(12, 438);
+			this.AvgRGBColorBox.Location = new System.Drawing.Point(12, 517);
 			this.AvgRGBColorBox.Margin = new System.Windows.Forms.Padding(4);
 			this.AvgRGBColorBox.Name = "AvgRGBColorBox";
 			this.AvgRGBColorBox.Size = new System.Drawing.Size(101, 94);
@@ -260,7 +260,7 @@
 			// 
 			// CheckColorButton
 			// 
-			this.CheckColorButton.Location = new System.Drawing.Point(29, 364);
+			this.CheckColorButton.Location = new System.Drawing.Point(81, 364);
 			this.CheckColorButton.Name = "CheckColorButton";
 			this.CheckColorButton.Size = new System.Drawing.Size(75, 42);
 			this.CheckColorButton.TabIndex = 51;
@@ -291,7 +291,7 @@
 			// AvgRGBLabel
 			// 
 			this.AvgRGBLabel.AutoSize = true;
-			this.AvgRGBLabel.Location = new System.Drawing.Point(17, 417);
+			this.AvgRGBLabel.Location = new System.Drawing.Point(17, 496);
 			this.AvgRGBLabel.Name = "AvgRGBLabel";
 			this.AvgRGBLabel.Size = new System.Drawing.Size(23, 17);
 			this.AvgRGBLabel.TabIndex = 64;
@@ -300,7 +300,7 @@
 			// ClosestHueColorBox
 			// 
 			this.ClosestHueColorBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.ClosestHueColorBox.Location = new System.Drawing.Point(139, 565);
+			this.ClosestHueColorBox.Location = new System.Drawing.Point(139, 644);
 			this.ClosestHueColorBox.Margin = new System.Windows.Forms.Padding(4);
 			this.ClosestHueColorBox.Name = "ClosestHueColorBox";
 			this.ClosestHueColorBox.Size = new System.Drawing.Size(101, 94);
@@ -310,7 +310,7 @@
 			// ClosestHueLabel
 			// 
 			this.ClosestHueLabel.AutoSize = true;
-			this.ClosestHueLabel.Location = new System.Drawing.Point(140, 665);
+			this.ClosestHueLabel.Location = new System.Drawing.Point(140, 744);
 			this.ClosestHueLabel.Name = "ClosestHueLabel";
 			this.ClosestHueLabel.Size = new System.Drawing.Size(23, 17);
 			this.ClosestHueLabel.TabIndex = 65;
@@ -319,7 +319,7 @@
 			// AvgHSLLabel
 			// 
 			this.AvgHSLLabel.AutoSize = true;
-			this.AvgHSLLabel.Location = new System.Drawing.Point(14, 544);
+			this.AvgHSLLabel.Location = new System.Drawing.Point(14, 623);
 			this.AvgHSLLabel.Name = "AvgHSLLabel";
 			this.AvgHSLLabel.Size = new System.Drawing.Size(23, 17);
 			this.AvgHSLLabel.TabIndex = 68;
@@ -328,7 +328,7 @@
 			// AvgHSLColorBox
 			// 
 			this.AvgHSLColorBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.AvgHSLColorBox.Location = new System.Drawing.Point(12, 565);
+			this.AvgHSLColorBox.Location = new System.Drawing.Point(12, 644);
 			this.AvgHSLColorBox.Margin = new System.Windows.Forms.Padding(4);
 			this.AvgHSLColorBox.Name = "AvgHSLColorBox";
 			this.AvgHSLColorBox.Size = new System.Drawing.Size(101, 94);
@@ -338,7 +338,7 @@
 			// CIERGBColorBox
 			// 
 			this.CIERGBColorBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.CIERGBColorBox.Location = new System.Drawing.Point(139, 707);
+			this.CIERGBColorBox.Location = new System.Drawing.Point(81, 783);
 			this.CIERGBColorBox.Margin = new System.Windows.Forms.Padding(4);
 			this.CIERGBColorBox.Name = "CIERGBColorBox";
 			this.CIERGBColorBox.Size = new System.Drawing.Size(101, 94);
@@ -348,16 +348,17 @@
 			// FinalColorGuessLabel
 			// 
 			this.FinalColorGuessLabel.AutoSize = true;
-			this.FinalColorGuessLabel.Location = new System.Drawing.Point(172, 377);
+			this.FinalColorGuessLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 20F);
+			this.FinalColorGuessLabel.Location = new System.Drawing.Point(13, 431);
 			this.FinalColorGuessLabel.Name = "FinalColorGuessLabel";
-			this.FinalColorGuessLabel.Size = new System.Drawing.Size(23, 17);
+			this.FinalColorGuessLabel.Size = new System.Drawing.Size(50, 39);
 			this.FinalColorGuessLabel.TabIndex = 70;
 			this.FinalColorGuessLabel.Text = "---";
 			// 
 			// CIERGBLabel
 			// 
 			this.CIERGBLabel.AutoSize = true;
-			this.CIERGBLabel.Location = new System.Drawing.Point(136, 809);
+			this.CIERGBLabel.Location = new System.Drawing.Point(78, 885);
 			this.CIERGBLabel.Name = "CIERGBLabel";
 			this.CIERGBLabel.Size = new System.Drawing.Size(23, 17);
 			this.CIERGBLabel.TabIndex = 71;
@@ -367,7 +368,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(1906, 826);
+			this.ClientSize = new System.Drawing.Size(1906, 966);
 			this.Controls.Add(this.CIERGBLabel);
 			this.Controls.Add(this.FinalColorGuessLabel);
 			this.Controls.Add(this.CIERGBColorBox);

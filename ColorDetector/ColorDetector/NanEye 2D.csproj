@@ -7,8 +7,8 @@
     <ProjectGuid>{974E9EE9-8085-45BB-B375-B3C0F2070914}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ColorDetector</RootNamespace>
-    <AssemblyName>ColorDetector</AssemblyName>
+    <RootNamespace>NanEye2D</RootNamespace>
+    <AssemblyName>NanEye2D</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <PublishUrl>publish\</PublishUrl>

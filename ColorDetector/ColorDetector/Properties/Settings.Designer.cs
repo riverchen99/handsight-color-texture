@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ColorDetector.Properties {
+namespace NanEye2D.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
