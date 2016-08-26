@@ -327,7 +327,7 @@ namespace IduleProvider {
 			return tempImg;
 		}
 
-		double angleThreshold = .1;
+		double angleThreshold = .1; // max threshold for perpendicular lines
 		private Image<Bgr, byte> HoughTransform(Image<Gray, byte> binaryImg) {
 			// hough transform
 			Image<Bgr, byte> tempImg = binaryImg.Convert<Bgr, byte>();
@@ -458,12 +458,14 @@ namespace IduleProvider {
 	}
 
 	public class sortRhoHelper : IComparer<polarEq> {
+		// compare rhos
 		public int Compare(polarEq a, polarEq b) {
 			return a.rho == b.rho ? 0 : (a.rho > b.rho ? 1 : -1);
 		}
 	}
 
 	public class sortThetaHelper : IComparer<polarEq> {
+		// compare thetas
 		public int Compare(polarEq a, polarEq b) {
 			return a.theta == b.theta ? 0 : (a.theta > b.theta ? 1 : -1);
 		}

@@ -374,7 +374,8 @@ namespace IduleProvider {
 			Graphics g2 = Graphics.FromImage(histSmoothedImg);
 
 			for (int bin = 0; bin < smoothedHistData.Count; bin++) {
-				g2.FillRectangle(new SolidBrush(ColorFromHSL(1.0 * bin / bins, 1.0, .5)), new Rectangle(0, bin * (histBox.Height / bins), (int) histBox.Width * smoothedHistData[bin] / smoothedHistData.Max(), smoothedHistBox.Height / bins));
+				g2.FillRectangle(new SolidBrush(ColorFromHSL(1.0 * bin / bins, 1.0, .5)), new Rectangle(0, bin * (histBox.Height / bins), (int) histBox.Width * smoothedHistData[bin] / histData.Max(), smoothedHistBox.Height / bins)); 
+				// we still divide by histData.Max() to maintain consistent scale
 			}
 		}
 
@@ -494,7 +495,8 @@ namespace IduleProvider {
 					hueHistPeaks.Add(i);
 				}
 			}
-
+			
+			// find closest colors to peak hues
 			List<Color> closestHueColors = new List<Color>();
 			foreach (int i in hueHistPeaks) {
 				Color closestHueColor = Color.Black;
@@ -511,13 +513,15 @@ namespace IduleProvider {
 			}
 			*/
 
-
+			// find closest color to avg rgb pixels
 			Color closestRGBColor = Color.Black;
 			var colorMineAvg = new ColorMine.ColorSpaces.Rgb { R = totalR / pxCount, G = totalG / pxCount, B = totalB / pxCount };
 			var colorMineClosest = new ColorMine.ColorSpaces.Rgb { R = 0, G = 0, B = 0 };
 			foreach (Color c in colorList) {
+				// euclidean distance
 				closestRGBColor = RGBColorDistance(avgRGBColor, c) < RGBColorDistance(avgRGBColor, closestRGBColor) ? c : closestRGBColor;
 				//closestHueColor = Math.Abs(c.GetHue() - totalH / pxCount) < Math.Abs(closestHueColor.GetHue() - totalH / pxCount) ? c : closestHueColor;
+				// cie2000 distance
 				colorMineClosest = colorMineAvg.Compare(colorMineClosest, new ColorMine.ColorSpaces.Comparisons.CieDe2000Comparison()) < colorMineAvg.Compare(new ColorMine.ColorSpaces.Rgb { R = c.R, G = c.G, B = c.B }, new ColorMine.ColorSpaces.Comparisons.CieDe2000Comparison()) ? colorMineClosest : new ColorMine.ColorSpaces.Rgb { R = c.R, G = c.G, B = c.B };
 				//Console.WriteLine(colorMineAvg.Compare(new ColorMine.ColorSpaces.Rgb { R = c.R, G = c.G, B = c.B }, new ColorMine.ColorSpaces.Comparisons.CieDe2000Comparison()));
 			}
@@ -527,6 +531,7 @@ namespace IduleProvider {
 			//Console.WriteLine("r {0}, g {1}, b {2}", colorMineClosest.R, colorMineClosest.G, colorMineClosest.B);
 			//Console.WriteLine(colorMineAvg.Compare(colorMineClosest, new ColorMine.ColorSpaces.Comparisons.CieDe2000Comparison()));
 
+			// check sat and lum
 			/*
 			if (totalL / pxCount < .1) {
 				closestHueColor = Color.Black;
